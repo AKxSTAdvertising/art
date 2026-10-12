@@ -22,7 +22,6 @@ if(motionTargets.length){
   const intro=document.getElementById('paint-intro');
   if(!intro)return;
   const brand=intro.querySelector('.paint-intro-brand');
-  const skip=intro.querySelector('.paint-intro-skip');
   const oldNodes=intro.querySelectorAll('.paint-intro-landscape,.paint-intro-brush');
   oldNodes.forEach(n=>n.remove());
   intro.classList.add('sketch-intro');
@@ -107,7 +106,7 @@ if(motionTargets.length){
     draw(1);
     brand.classList.add('is-visible');
     intro.classList.add('sketch-complete');
-    window.setTimeout(()=>{intro.classList.add('is-finished');window.setTimeout(()=>intro.remove(),850);},950);
+    window.setTimeout(()=>{intro.classList.add('is-finished');intro.remove();},700);
   }
   function animate(now){
     if(!startTime)startTime=now;
@@ -117,7 +116,6 @@ if(motionTargets.length){
     else finish();
     if(p>.78)brand.classList.add('is-visible');
   }
-  skip?.addEventListener('click',finish);
   window.addEventListener('resize',resize);
   art.onload=()=>{
     resize();
@@ -126,7 +124,6 @@ if(motionTargets.length){
   };
   art.onerror=()=>{
     /* If the hosted image is temporarily unavailable, keep the intro usable. */
-    brand.classList.add('is-visible');
-    window.setTimeout(finish,1200);
+    intro.remove();
   };
 })();
