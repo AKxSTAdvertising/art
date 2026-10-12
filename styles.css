@@ -452,3 +452,25 @@ h1 em:after,h2 em:after{content:"";position:absolute;left:0;right:0;bottom:-.04e
 @media(max-width:600px){
  .paint-intro.sketch-intro .sketch-pencil{width:44px;height:44px}
 }
+
+
+/* Artist's board: warm off-white paper, mounted artwork and one graphite pencil. */
+.paint-intro.sketch-intro{
+  background:#f4f1e9!important;
+  background-image:radial-gradient(ellipse at 50% 42%,#fbf9f4 0%,#f4f1e9 72%,#e9e4d9 100%)!important;
+}
+.paint-intro.sketch-intro .paint-intro-canvas{z-index:2!important}
+.paint-intro.sketch-intro .paint-intro-canvas{
+  filter:drop-shadow(0 15px 14px rgba(50,43,34,.16));
+}
+.paint-intro.sketch-intro .sketch-pencil{
+  width:clamp(38px,4.2vw,54px)!important;
+  height:clamp(38px,4.2vw,54px)!important;
+  filter:drop-shadow(2px 3px 2px rgba(40,34,28,.22))!important;
+  z-index:9!important;
+}
+.paint-intro.sketch-intro .paint-intro-brand{bottom:clamp(12px,2vh,22px)!important}
+@media(max-width:600px){
+ .paint-intro.sketch-intro .paint-intro-canvas{filter:drop-shadow(0 8px 9px rgba(50,43,34,.14))}
+ .paint-intro.sketch-intro .sketch-pencil{width:36px!important;height:36px!important}
+}
