@@ -17,134 +17,55 @@ if(motionTargets.length){
 }
 
 
-/* First-visit cinematic brush reveal: black canvas -> brand -> nature painting -> homepage. */
-(function initPaintIntro(){
+/* White-canvas colour burst intro: no brush, liquid colour, dimensional brand reveal. */
+(function initColourIntro(){
   const intro=document.getElementById('paint-intro');
-  if(!intro) return;
-  const canvas=intro.querySelector('.paint-intro-canvas');
-  const brush=intro.querySelector('.paint-intro-brush');
+  if(!intro)return;
   const brand=intro.querySelector('.paint-intro-brand');
   const skip=intro.querySelector('.paint-intro-skip');
-  const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let stopped=false,raf=0,timers=[];
-  const later=(fn,ms)=>{const id=window.setTimeout(fn,ms);timers.push(id);return id;};
+  const landscape=intro.querySelector('.paint-intro-landscape');
+  const canvas=intro.querySelector('.paint-intro-canvas');
+  const brush=intro.querySelector('.paint-intro-brush');
+  if(landscape)landscape.remove();
+  if(canvas)canvas.remove();
+  if(brush)brush.remove();
+  intro.classList.add('colour-intro');
+  const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let finished=false, timers=[];
+  const later=(fn,ms)=>{const id=setTimeout(fn,ms);timers.push(id);return id;};
   function finish(){
-    if(stopped)return;
-    stopped=true;timers.forEach(clearTimeout);cancelAnimationFrame(raf);
+    if(finished)return;finished=true;timers.forEach(clearTimeout);
     intro.classList.add('is-finished');
-    try{sessionStorage.setItem('artPaintIntroSeen','1');}catch(e){}
-    later(()=>intro.remove(),1000);
+    try{sessionStorage.setItem('artPaintIntroSeen','1')}catch(e){}
+    later(()=>intro.remove(),950);
   }
-  if(reduced){intro.remove();return;}
+  if(reduce){intro.remove();return;}
   try{if(sessionStorage.getItem('artPaintIntroSeen')==='1'){intro.remove();return;}}catch(e){}
-  const ctx=canvas.getContext('2d');
-  if(!ctx){finish();return;}
-  let w=0,h=0,dpr=1;
-  function size(){
-    dpr=Math.min(window.devicePixelRatio||1,1.7);w=window.innerWidth;h=window.innerHeight;
-    canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);
-    canvas.style.width=w+'px';canvas.style.height=h+'px';
-    ctx.setTransform(dpr,0,0,dpr,0,0);ctx.globalCompositeOperation='source-over';ctx.fillStyle='#080908';ctx.fillRect(0,0,w,h);
-  }
-  size();
-  window.addEventListener('resize',size,{passive:true});
-  const pause=(ms)=>new Promise(resolve=>later(resolve,ms));
-  const moveBrush=(x,y,angle=22)=>{brush.style.left=(x-brush.offsetWidth*.5)+'px';brush.style.top=(y-brush.offsetHeight*.18)+'px';brush.style.transform='rotate('+angle+'deg)';};
-  function eraseStroke(points,width){
-    ctx.save();ctx.globalCompositeOperation='destination-out';ctx.lineCap='round';ctx.lineJoin='round';ctx.lineWidth=width;
-    ctx.beginPath();ctx.moveTo(points[0][0],points[0][1]);
-    for(let i=1;i<points.length;i++){const p=points[i];ctx.quadraticCurveTo(points[i-1][0],points[i-1][1],p[0],p[1]);}
-    ctx.stroke();ctx.restore();
-  }
-  function animateStroke(points,width,duration){
-    return new Promise(resolve=>{
-      const start=performance.now(),total=points.length;
-      function frame(now){
-        if(stopped){resolve();return;}
-        const p=Math.min(1,(now-start)/duration),idx=Math.max(1,Math.ceil(p*(total-1)));
-        const partial=points.slice(0,idx+1);
-        if(p>0){eraseStroke(partial,width);const point=points[Math.min(idx,total-1)];moveBrush(point[0],point[1],18+(Math.sin(now/120)*7));}
-        if(p<1)raf=requestAnimationFrame(frame);else resolve();
-      }
-      raf=requestAnimationFrame(frame);
-    });
-  }
-  function curved(x1,y1,x2,y2,steps=22,bend=0){
-    const out=[];for(let i=0;i<=steps;i++){const t=i/steps;out.push([x1+(x2-x1)*t,y1+(y2-y1)*t+Math.sin(t*Math.PI)*bend]);}return out;
-  }
-  function zigzagAcross(rect,rows,stepsPerRow=18){
-    const points=[];
-    for(let row=0;row<rows;row++){
-      const y=rect.top+(rect.height*(row/(rows-1||1)));
-      const fromX=row%2===0?rect.left:rect.right;
-      const toX=row%2===0?rect.right:rect.left;
-      for(let s=0;s<=stepsPerRow;s++){
-        const t=s/stepsPerRow;
-        points.push([fromX+(toX-fromX)*t,y]);
-      }
-    }
-    return points;
-  }
-  function revealBrandZigzag(progress){
-    const step=13,limit=Math.max(0,Math.min(100,progress*100));
-    const pts=[[0,0],[100,0]];
-    let y=step,dir=1;
-    while(y<limit){
-      pts.push([dir===1?100:0,y]);
-      y+=step;dir*=-1;
-      pts.push([dir===1?0:100,Math.min(y,limit)]);
-      y+=step;dir*=-1;
-    }
-    pts.push([dir===1?100:0,limit],[0,0]);
-    brand.style.clipPath='polygon('+pts.map(p=>p[0]+'% '+p[1]+'%').join(',')+')';
-  }
-  function animateLogoPaint(points,duration){
-    return new Promise(resolve=>{
-      const start=performance.now(),total=points.length;
-      brand.classList.add('is-visible');
-      function frame(now){
-        if(stopped){resolve();return;}
-        const p=Math.min(1,(now-start)/duration),idx=Math.max(1,Math.ceil(p*(total-1)));
-        const point=points[Math.min(idx,total-1)];
-        revealBrandZigzag(p);
-        /* Logo reveal is clipped in zig-zag; keep the canvas black behind it. */
-        moveBrush(point[0],point[1],point[0]>(w/2)?-22:22);
-        if(p<1)raf=requestAnimationFrame(frame);else{revealBrandZigzag(1);resolve();}
-      }
-      revealBrandZigzag(0);
-      raf=requestAnimationFrame(frame);
-    });
+  const colours=[
+    ['#ff4b45','#ffb52e','#ff4bba'],['#22c9d6','#5d67ff','#a75bff'],
+    ['#ff7a22','#f12d73','#ffd447'],['#3ad69a','#00a9ff','#e65aff'],
+    ['#ffd43b','#ff5b5b','#5a7cff'],['#fb4ca4','#8d4bff','#35d6d0']
+  ];
+  function splash(i){
+    const el=document.createElement('div');
+    el.className='colour-splash splash-'+(i%6);
+    const x=8+Math.random()*84,y=4+Math.random()*52;
+    el.style.left=x+'%';el.style.top=y+'%';
+    el.style.setProperty('--splash-delay',(i*90)+'ms');
+    const c=colours[i%colours.length];
+    el.style.setProperty('--c1',c[0]);el.style.setProperty('--c2',c[1]);el.style.setProperty('--c3',c[2]);
+    el.style.setProperty('--turn',(Math.random()*70-35)+'deg');
+    intro.insertBefore(el,brand);
+    later(()=>el.remove(),3100);
   }
   async function run(){
-    await pause(500);if(stopped)return;
-    brush.classList.add('is-active');
-    const cx=w*.5,cy=h*.5;
-    const brandRect=brand.getBoundingClientRect();
-    const logoPath=zigzagAcross({
-      left:Math.max(18,brandRect.left-8),
-      right:Math.min(w-18,brandRect.right+8),
-      top:Math.max(20,brandRect.top-12),
-      height:Math.min(brandRect.height+24,Math.max(100,h*.19))
-    },7,24);
-    await animateLogoPaint(logoPath,1650);
-    if(stopped)return;
-    await pause(260);
-    brand.classList.add('is-lowered');
-    /* Broad zig-zag brush strokes sweep from the top of the canvas to the bottom. */
-    const edge= Math.max(34,Math.min(76,w*.075));
-    const landscapePath=zigzagAcross({
-      left:-edge*.65,
-      right:w+edge*.65,
-      top:h*.36,
-      height:h*.72
-    },9,32);
-    await animateStroke(landscapePath,Math.max(50,Math.min(100,w*.105)),3000);
-    if(stopped)return;
-    await pause(180);
-    ctx.save();ctx.globalCompositeOperation='destination-out';ctx.fillStyle='#000';ctx.fillRect(0,0,w,h);ctx.restore();
-    brush.classList.remove('is-active');
-    later(finish,650);
+    await new Promise(resolve=>later(resolve,220));
+    for(let i=0;i<6;i++){splash(i);await new Promise(resolve=>later(resolve,430));}
+    await new Promise(resolve=>later(resolve,180));
+    brand.classList.add('is-visible','is-3d');
+    await new Promise(resolve=>later(resolve,1450));
+    finish();
   }
-  skip.addEventListener('click',finish);
+  if(skip)skip.addEventListener('click',finish);
   run().catch(finish);
 })();
