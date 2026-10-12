@@ -17,7 +17,7 @@ if(motionTargets.length){
 }
 
 
-/* Slower zig-zag sketch reveal of the uploaded artwork. */
+/* Faster diagonal sketch reveal of the uploaded artwork. */
 (function initSketchIntro(){
   const intro=document.getElementById('paint-intro');
   if(!intro)return;
@@ -107,7 +107,7 @@ if(motionTargets.length){
   }
   function animate(now){
     if(!startTime)startTime=now;
-    const p=Math.min(1,(now-startTime)/16000);
+    const p=Math.min(1,(now-startTime)/5500);
     draw(p);
     if(p<1){raf=requestAnimationFrame(animate);}
     else finish();
