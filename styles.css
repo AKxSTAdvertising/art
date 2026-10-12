@@ -281,3 +281,38 @@ h1 em:after,h2 em:after{content:"";position:absolute;left:0;right:0;bottom:-.04e
   .paint-intro.colour-intro .colour-splash,
   .paint-intro.colour-intro .liquid-drop{animation-duration:.01ms!important}
 }
+
+
+/* Final paint tuning: smaller, slower, better-spaced splashes. Only the logo stays 3D. */
+.paint-intro.colour-intro .colour-splash{
+  width:clamp(105px,16vw,220px)!important;
+  border-radius:48% 52% 58% 42% / 42% 48% 52% 58%;
+  animation-duration:4.4s!important;
+  filter:none!important;
+  mix-blend-mode:multiply;
+}
+.paint-intro.colour-intro .colour-splash:before{height:82%!important;width:6%!important}
+.paint-intro.colour-intro .colour-splash:after{height:62%!important;width:3.5%!important}
+.paint-intro.colour-intro .liquid-drop{animation-duration:2.8s!important}
+.paint-intro.colour-intro .paint-intro-mark,
+.paint-intro.colour-intro .paint-intro-name{
+  box-shadow:none!important;
+  text-shadow:none!important;
+  filter:none!important;
+  transform-style:preserve-3d;
+}
+.paint-intro.colour-intro .paint-intro-mark{
+  box-shadow:none!important;
+  text-shadow:none!important;
+  -webkit-text-fill-color:transparent;
+  background:linear-gradient(135deg,#ff3d81,#ff8a00 24%,#ffe033 42%,#18c98b 59%,#00b9ff 76%,#8b48ff);
+  -webkit-background-clip:text;background-clip:text;
+}
+.paint-intro.colour-intro .paint-intro-name{
+  text-shadow:none!important;
+  box-shadow:none!important;
+  transform:translateZ(0);
+}
+@media(max-width:600px){
+ .paint-intro.colour-intro .colour-splash{width:clamp(88px,24vw,140px)!important}
+}
