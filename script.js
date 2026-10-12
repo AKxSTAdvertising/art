@@ -107,7 +107,7 @@ if(motionTargets.length){
         const p=Math.min(1,(now-start)/duration),idx=Math.max(1,Math.ceil(p*(total-1)));
         const point=points[Math.min(idx,total-1)];
         revealBrandZigzag(p);
-        eraseStroke(points.slice(0,idx+1),Math.max(7,Math.min(16,w*.014)));
+        /* Logo reveal is clipped in zig-zag; keep the canvas black behind it. */
         moveBrush(point[0],point[1],point[0]>(w/2)?-22:22);
         if(p<1)raf=requestAnimationFrame(frame);else{revealBrandZigzag(1);resolve();}
       }
