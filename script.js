@@ -31,11 +31,9 @@ if(motionTargets.length){
   function finish(){
     if(finished)return;finished=true;timers.forEach(clearTimeout);
     intro.classList.add('is-finished');
-    try{sessionStorage.setItem('artPaintIntroSeen','1')}catch(e){}
     later(()=>intro.remove(),850);
   }
   if(reduce){intro.remove();return;}
-  try{if(sessionStorage.getItem('artPaintIntroSeen')==='1'){intro.remove();return;}}catch(e){}
   const palette=[
     ['#ff3b30','#ffb21c','#f72585'],['#00c2d1','#2364ff','#8a2be2'],
     ['#ff6a00','#ff1744','#ffd400'],['#00b879','#00a6fb','#d000ff'],
