@@ -48,7 +48,14 @@ if(motionTargets.length){
   }
   function splash(i){
     const el=document.createElement('div');el.className='colour-splash splash-'+(i%6);
-    const x=12+Math.random()*76,y=10+Math.random()*45;
+    /* Fixed, screen-wide coverage prevents bursts clustering in one area. */
+    const positions=[
+      [8,18],[30,42],[53,15],[78,34],
+      [94,57],[17,68],[61,61],[84,12]
+    ];
+    const [baseX,baseY]=positions[i%positions.length];
+    const x=Math.max(5,Math.min(95,baseX+(Math.random()-.5)*8));
+    const y=Math.max(8,Math.min(78,baseY+(Math.random()-.5)*8));
     el.style.left=x+'%';el.style.top=y+'%';
     const c=palette[i%palette.length];
     el.style.setProperty('--c1',c[0]);el.style.setProperty('--c2',c[1]);el.style.setProperty('--c3',c[2]);
