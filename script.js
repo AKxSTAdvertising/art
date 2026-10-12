@@ -124,3 +124,46 @@ if(motionTargets.length){
     intro.remove();
   };
 })();
+
+/* Reliable desktop hover dropdowns + active-page underline for every header. */
+(function academyHeader(){
+ const nav=document.querySelector('.site-nav');
+ if(!nav)return;
+ const dropdowns=[...nav.querySelectorAll('details.nav-dropdown')];
+ const closeTimers=new WeakMap();
+ dropdowns.forEach((item)=>{
+   const summary=item.querySelector('summary');
+   const panel=item.querySelector('.nav-dropdown-panel');
+   if(!summary||!panel)return;
+   item.addEventListener('pointerenter',(event)=>{
+     if(event.pointerType==='touch'||window.matchMedia('(max-width: 900px)').matches)return;
+     const old=closeTimers.get(item);if(old)clearTimeout(old);
+     dropdowns.forEach(other=>{if(other!==item)other.open=false;});
+     item.open=true;
+   });
+   item.addEventListener('pointerleave',(event)=>{
+     if(event.pointerType==='touch'||window.matchMedia('(max-width: 900px)').matches)return;
+     const timer=setTimeout(()=>{if(!item.matches(':hover')&&!item.contains(document.activeElement))item.open=false;},180);
+     closeTimers.set(item,timer);
+   });
+   summary.addEventListener('click',(event)=>{
+     if(window.matchMedia('(hover:hover) and (min-width: 901px)').matches){
+       event.preventDefault();
+       item.open=!item.open;
+     }
+   });
+ });
+ const current=(location.pathname.split('/').pop()||'index.html').toLowerCase();
+ nav.querySelectorAll('a[href]').forEach(link=>{
+   const target=(link.getAttribute('href')||'').split(/[?#]/)[0].split('/').pop().toLowerCase();
+   if(target&&target===current){
+     link.classList.add('is-current');
+     link.setAttribute('aria-current','page');
+     const parent=link.closest('details.nav-dropdown');
+     if(parent)parent.querySelector('summary')?.classList.add('is-current');
+   }
+ });
+ document.addEventListener('pointerdown',(event)=>{
+   if(!nav.contains(event.target))dropdowns.forEach(item=>item.open=false);
+ });
+})();
