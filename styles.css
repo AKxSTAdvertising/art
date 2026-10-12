@@ -220,3 +220,8 @@ h1 em:after,h2 em:after{content:"";position:absolute;left:0;right:0;bottom:-.04e
 @media(hover:none),(pointer:coarse){.art-brush-cursor{display:none}.home-page,.home-page a,.home-page button,.home-page summary{cursor:auto}}
 @media(max-width:600px){.art-intro-name{font-size:clamp(38px,10vw,65px);white-space:normal;max-width:90vw}.art-intro-kicker,.art-intro-tagline{font-size:8px;letter-spacing:.23em}.art-intro-center{padding-bottom:35px}.art-intro-brush{width:75px;height:27px;top:calc(50% - 3px)}.art-intro-loading{font-size:8px;bottom:24px}}
 @media(prefers-reduced-motion:reduce){.art-intro-landscape{animation:none;opacity:.72;filter:none;transform:none}.art-intro-kicker,.art-intro-tagline,.art-intro-loading{animation:none;opacity:1;transform:none}.art-intro-name span{animation:none;clip-path:none}.art-intro-brush{display:none}.art-intro{animation:artIntroQuick .55s 1.1s ease forwards}@keyframes artIntroQuick{to{opacity:0;visibility:hidden}}}
+
+
+/* The paintbrush pointer is used consistently throughout the whole site */
+body,body a,body button,body summary{cursor:none}
+@media(hover:none),(pointer:coarse){body,body a,body button,body summary{cursor:auto}}
