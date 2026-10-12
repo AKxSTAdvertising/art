@@ -1,28 +1,36 @@
 # Art, Made Personal — website starter
 
-Bright, responsive art-studio website starter built with static HTML, CSS and JavaScript for GitHub Pages.
+A responsive, bright art-studio website built with static HTML, CSS and JavaScript for GitHub Pages. The design intentionally balances a reference-inspired workshop/editorial flow with the original three-pathway concept.
 
-## Pages
-- `index.html` — homepage and three primary paths
-- `learn.html` — workshops and learning
-- `gallery.html` — painting gallery preview
-- `about.html` — artist profile placeholder
-- `contact.html` — contact and booking enquiry page (demo form, not connected)
-- `privacy.html` — draft privacy information
+## Main pathways
+- **I want to learn** — workshops, learning formats, process, curriculum outline and FAQs.
+- **I want to buy a painting** — visual gallery preview and artwork enquiry flow.
+- **Book a call** — contact and collaboration enquiry.
+
+## Pages and assets
+- `index.html` — homepage, three pathways, learning feature, gallery preview, artist section, process, FAQs and CTA.
+- `learn.html` — workshop/learning landing page with anchor navigation, format cards, learning flow, curriculum outline and FAQs.
+- `gallery.html` — gallery preview, artwork enquiry flow and how-to-buy steps.
+- `about.html` — artist profile placeholder.
+- `contact.html` — enquiry form demo (not connected to a backend).
+- `privacy.html` — draft privacy information.
+- `styles.css` — responsive design system and page layouts.
+- `script.js` — accessible mobile navigation and current-year footer.
+- `favicon.svg`, `robots.txt`, `sitemap.xml` — basic site and crawler files.
 
 ## Before launch
 1. Replace “Art, Made Personal” with the approved brand name and add the real logo.
-2. Replace placeholder biography with verified artist details and replace stock images with artwork/studio photos you have permission to use.
-3. Add real workshop dates, prices, materials, policies and booking links only after confirming them.
-4. Add real painting titles, medium, dimensions, prices, availability and delivery details.
-5. Connect the enquiry form to a verified email/form provider or booking calendar. The current form intentionally does not transmit or store submissions.
-6. Replace canonical and sitemap URLs if the final custom domain changes.
-7. Update the privacy policy to match actual services and applicable requirements.
+2. Replace placeholder biography with verified artist details; replace stock images with artwork/studio photos you own or have permission to use.
+3. Add confirmed workshop dates, prices, materials, policies, instructor details and booking links.
+4. Add real painting titles, artist, medium, dimensions, prices, availability and delivery details.
+5. Connect the enquiry form to a verified email/form service or booking calendar. The current form intentionally does not send or store submissions.
+6. Update the privacy policy to reflect the real data practices, providers and applicable requirements.
+7. Replace canonical URLs and sitemap URLs if the final domain changes.
 8. Test mobile navigation, keyboard access, contrast, links and image loading.
-9. In GitHub, open **Settings → Pages**, choose **Deploy from a branch**, select `main` and `/(root)`, and save. Wait for GitHub Pages to confirm deployment before sharing the live URL.
+9. In GitHub, open **Settings → Pages**, choose **Deploy from a branch**, select `main` and `/(root)`, then save. Wait for GitHub Pages to confirm deployment before sharing the public URL.
 
 ## SEO foundations
-Semantic headings, page-specific titles and descriptions, canonical URLs, robots.txt, sitemap.xml, accessible navigation, image alt text, FAQ content and a basic WebSite JSON-LD block are included. Validate structured data and submit the sitemap in Search Console once the final public domain is live.
+Semantic headings, page-specific titles and descriptions, canonical URLs, robots.txt, sitemap.xml, accessible navigation, descriptive image alt text, FAQ content and a basic WebSite JSON-LD block are included. Validate structured data and submit the sitemap in Search Console once the final public domain is live.
 
 ## Notes
-Brand, artwork and artist information are placeholders. Images sourced from Unsplash are illustrative and not a representation of inventory. No prices, testimonials, credentials or workshop availability are claimed.
+Brand, artwork, artist and course information are placeholders. Unsplash images are illustrative, not a representation of inventory. No testimonials, prices, credentials, workshop availability or performance claims are invented. The curriculum on the workshop page is explicitly a sample structure, not a promised syllabus.
