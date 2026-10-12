@@ -25,9 +25,8 @@ if(motionTargets.length){
   if(intro){
     document.documentElement.classList.add('intro-running');
     const finish=()=>{if(!intro.classList.contains('is-leaving'))intro.classList.add('is-leaving');document.documentElement.classList.remove('intro-running');};
-    window.setTimeout(finish,reduced?1500:5200);
+    window.setTimeout(finish,reduced?2200:7800);
     intro.addEventListener('click',finish,{once:true});
-    intro.addEventListener('animationend',(event)=>{if(event.animationName==='artLandscapeReveal')window.setTimeout(finish,1900);});
     window.addEventListener('pageshow',()=>{if(performance&&performance.getEntriesByType&&performance.getEntriesByType('navigation')[0]?.type==='back_forward')finish();},{once:true});
   }
   if(!brush||reduced||!window.matchMedia('(hover: hover) and (pointer: fine)').matches)return;
