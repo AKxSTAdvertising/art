@@ -17,53 +17,60 @@ if(motionTargets.length){
 }
 
 
-/* White-canvas colour burst intro: no brush, liquid colour, dimensional brand reveal. */
+/* Four-second white-canvas liquid paint throw and bold dimensional brand reveal. */
 (function initColourIntro(){
   const intro=document.getElementById('paint-intro');
   if(!intro)return;
   const brand=intro.querySelector('.paint-intro-brand');
   const skip=intro.querySelector('.paint-intro-skip');
-  const landscape=intro.querySelector('.paint-intro-landscape');
-  const canvas=intro.querySelector('.paint-intro-canvas');
-  const brush=intro.querySelector('.paint-intro-brush');
-  if(landscape)landscape.remove();
-  if(canvas)canvas.remove();
-  if(brush)brush.remove();
+  ['.paint-intro-landscape','.paint-intro-canvas','.paint-intro-brush'].forEach(s=>intro.querySelector(s)?.remove());
   intro.classList.add('colour-intro');
   const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let finished=false, timers=[];
+  let finished=false,timers=[];
   const later=(fn,ms)=>{const id=setTimeout(fn,ms);timers.push(id);return id;};
   function finish(){
     if(finished)return;finished=true;timers.forEach(clearTimeout);
     intro.classList.add('is-finished');
     try{sessionStorage.setItem('artPaintIntroSeen','1')}catch(e){}
-    later(()=>intro.remove(),950);
+    later(()=>intro.remove(),850);
   }
   if(reduce){intro.remove();return;}
   try{if(sessionStorage.getItem('artPaintIntroSeen')==='1'){intro.remove();return;}}catch(e){}
-  const colours=[
-    ['#ff4b45','#ffb52e','#ff4bba'],['#22c9d6','#5d67ff','#a75bff'],
-    ['#ff7a22','#f12d73','#ffd447'],['#3ad69a','#00a9ff','#e65aff'],
-    ['#ffd43b','#ff5b5b','#5a7cff'],['#fb4ca4','#8d4bff','#35d6d0']
+  const palette=[
+    ['#ff3b30','#ffb21c','#f72585'],['#00c2d1','#2364ff','#8a2be2'],
+    ['#ff6a00','#ff1744','#ffd400'],['#00b879','#00a6fb','#d000ff'],
+    ['#ffcc00','#ff4d6d','#4361ee'],['#ff1493','#7b2cff','#00d4ff']
   ];
+  function makeDrop(parent,x,y,size,colour,delay,angle){
+    const d=document.createElement('i');
+    d.className='liquid-drop';
+    d.style.left=x+'%';d.style.top=y+'%';d.style.width=size+'px';
+    d.style.setProperty('--drop-colour',colour);d.style.setProperty('--drop-delay',delay+'ms');d.style.setProperty('--drop-angle',angle+'deg');
+    parent.appendChild(d);later(()=>d.remove(),2900+delay);
+  }
   function splash(i){
-    const el=document.createElement('div');
-    el.className='colour-splash splash-'+(i%6);
-    const x=8+Math.random()*84,y=4+Math.random()*52;
+    const el=document.createElement('div');el.className='colour-splash splash-'+(i%6);
+    const x=12+Math.random()*76,y=10+Math.random()*45;
     el.style.left=x+'%';el.style.top=y+'%';
-    el.style.setProperty('--splash-delay',(i*90)+'ms');
-    const c=colours[i%colours.length];
+    const c=palette[i%palette.length];
     el.style.setProperty('--c1',c[0]);el.style.setProperty('--c2',c[1]);el.style.setProperty('--c3',c[2]);
-    el.style.setProperty('--turn',(Math.random()*70-35)+'deg');
+    el.style.setProperty('--turn',(Math.random()*40-20)+'deg');
+    el.style.setProperty('--splash-delay',(i*70)+'ms');
     intro.insertBefore(el,brand);
-    later(()=>el.remove(),3100);
+    /* Fine satellite droplets make the burst read like thrown liquid paint. */
+    for(let d=0;d<11;d++){
+      const dx=(Math.random()-.5)*38,dy=(Math.random()-.5)*38;
+      makeDrop(intro,Math.max(1,Math.min(99,x+dx)),Math.max(1,Math.min(85,y+dy)),3+Math.random()*12,c[d%3],i*65+Math.random()*180,Math.random()*80-40);
+    }
+    later(()=>el.remove(),2800);
   }
   async function run(){
-    await new Promise(resolve=>later(resolve,220));
-    for(let i=0;i<6;i++){splash(i);await new Promise(resolve=>later(resolve,430));}
-    await new Promise(resolve=>later(resolve,180));
+    await new Promise(resolve=>later(resolve,120));
+    /* Paint hits in quick successive throws; the colour trails fall under gravity. */
+    for(let i=0;i<8;i++){splash(i);await new Promise(resolve=>later(resolve,250));}
+    await new Promise(resolve=>later(resolve,350));
     brand.classList.add('is-visible','is-3d');
-    await new Promise(resolve=>later(resolve,1450));
+    await new Promise(resolve=>later(resolve,900));
     finish();
   }
   if(skip)skip.addEventListener('click',finish);
