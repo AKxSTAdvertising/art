@@ -9,3 +9,50 @@
 .workshop-page-hero{padding:78px 0 62px;background:#f1e9df;text-align:center}.workshop-page-hero h1{font-size:clamp(48px,6vw,76px)}.workshop-page-hero>div>p:not(.eyebrow){max-width:680px;margin:0 auto;color:#68665f;line-height:1.85}.workshop-page-hero .hero-actions{margin-top:25px}.workshop-benefits{display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin-top:34px;font-size:10px;color:#67655e}.page-anchor-nav{display:flex;justify-content:center;gap:30px;flex-wrap:wrap;padding:17px 5%;background:#fffdf9;border-bottom:1px solid var(--line);border-top:1px solid var(--line);position:sticky;top:0;z-index:5}.page-anchor-nav a{font-size:11px;color:#68665f}.page-anchor-nav a:hover{color:#bd6546}.learning-card-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:30px}.learning-card{background:#fffdf9;border:1px solid var(--line);overflow:hidden}.learning-card>img{display:block;width:100%;height:275px;object-fit:cover}.learning-card-body{padding:25px 27px 29px}.course-kicker{font-size:9px;font-weight:700;letter-spacing:.15em;color:#a86348}.learning-card h3{font:500 30px/1.2 var(--serif);margin:12px 0}.learning-card p,.learning-card li{font-size:12px;line-height:1.8;color:#6e6a62}.learning-card ul{padding-left:17px;margin:17px 0 22px}.curriculum-list{border-top:1px solid var(--line);margin-top:30px}.curriculum-list article{display:grid;grid-template-columns:100px 1fr 30px;gap:20px;align-items:start;padding:24px 0;border-bottom:1px solid var(--line)}.curriculum-list article>span:first-child{font-size:9px;font-weight:700;letter-spacing:.13em;color:#ad6c51;padding-top:7px}.curriculum-list h3{font:500 24px/1.25 var(--serif);margin-bottom:7px}.curriculum-list p{font-size:12px;line-height:1.8;color:var(--muted);margin:0}.curriculum-symbol{font-size:20px;color:#bd7558;text-align:right}.workshop-details-note{display:flex;gap:17px;background:#f1e9df;padding:23px 25px;margin-top:30px}.details-icon{font-size:25px;color:#bd7558}.workshop-details-note b{font:500 19px var(--serif)}.workshop-details-note p{font-size:12px;line-height:1.8;color:#68665f;margin:6px 0 0}.learner-preview{background:#e9e5f6;padding:80px 0}.learner-preview-layout{display:grid;grid-template-columns:.9fr 1.1fr;gap:10%;align-items:center}.learner-preview-layout>div:first-child>p:not(.eyebrow):not(.notice){font-size:13px;line-height:1.9;color:#686570}.learner-preview-images{display:grid;grid-template-columns:1fr 1fr;gap:15px;align-items:center}.learner-preview-images img{width:100%;height:300px;object-fit:cover}.learner-preview-images img:first-child{margin-top:35px}.gallery-page-hero{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:8%;padding:70px 7.5% 80px;background:#f1e9df}.gallery-page-copy{max-width:570px}.gallery-page-copy h1{font-size:clamp(50px,6vw,76px)}.gallery-page-copy>p:not(.eyebrow){font-size:14px;line-height:1.9;color:#68665f;max-width:450px;margin-bottom:25px}.gallery-page-visual img{width:100%;height:440px;object-fit:cover;border-radius:3px 3px 100px 3px}.page-gallery-grid figcaption{display:flex;flex-direction:column;gap:4px}.page-gallery-grid figcaption b{font:500 19px var(--serif);color:var(--ink)}.page-gallery-grid figcaption span{font-size:10px;color:var(--muted)}.artwork-enquiry-band{padding:65px 0;background:#e9e5f6}.artwork-enquiry-layout{display:grid;grid-template-columns:1fr 1fr;gap:10%;align-items:center}.artwork-enquiry-layout h2{margin-bottom:0}.artwork-enquiry-layout>div:last-child p{font-size:13px;line-height:1.9;color:#66636f}
 @media(max-width:850px){.gallery-page-hero{padding:55px 6%;gap:5%}.gallery-page-visual img{height:360px}.learning-card-body{padding:21px}.learner-preview-layout{gap:6%}.learner-preview-images img{height:250px}}
 @media(max-width:580px){.workshop-page-hero{padding:58px 0 45px}.workshop-page-hero h1{font-size:46px}.workshop-benefits{gap:10px 16px;margin-top:25px}.page-anchor-nav{justify-content:flex-start;gap:20px;overflow-x:auto;white-space:nowrap;padding:14px 6%}.learning-card-grid{grid-template-columns:1fr;gap:15px}.learning-card>img{height:220px}.learning-card-body{padding:20px}.curriculum-list article{grid-template-columns:65px 1fr 18px;gap:12px;padding:19px 0}.curriculum-list h3{font-size:21px}.workshop-details-note{padding:18px;gap:12px}.learner-preview{padding:60px 0}.learner-preview-layout{grid-template-columns:1fr;gap:25px}.learner-preview-images img{height:210px}.gallery-page-hero{grid-template-columns:1fr;padding:55px 6%;gap:32px}.gallery-page-copy h1{font-size:49px}.gallery-page-visual img{height:320px;border-bottom-right-radius:65px}.artwork-enquiry-band{padding:50px 0}.artwork-enquiry-layout{grid-template-columns:1fr;gap:20px}.artwork-enquiry-layout h2{font-size:41px}}
+
+
+/* ART MOTION — gentle, tactile movement inspired by paint and paper */
+@keyframes artHeroIn{from{opacity:0;transform:translate3d(0,22px,0) scale(.985)}to{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+@keyframes paintDrift{0%,100%{transform:translate3d(0,0,0) rotate(-5deg)}50%{transform:translate3d(8px,-13px,0) rotate(3deg)}}
+@keyframes stampFloat{0%,100%{transform:translateY(0) rotate(7deg)}50%{transform:translateY(-9px) rotate(3deg)}}
+@keyframes brushSweep{from{transform:scaleX(0);transform-origin:left}to{transform:scaleX(1);transform-origin:left}}
+@keyframes softPulse{0%,100%{box-shadow:0 0 0 0 rgba(233,130,93,.12)}50%{box-shadow:0 0 0 10px rgba(233,130,93,0)}}
+.reference-hero-copy>*{animation:artHeroIn .75s both;animation-timing-function:cubic-bezier(.2,.7,.2,1)}
+.reference-hero-copy>*:nth-child(1){animation-delay:.06s}
+.reference-hero-copy>*:nth-child(2){animation-delay:.14s}
+.reference-hero-copy>*:nth-child(3){animation-delay:.22s}
+.reference-hero-copy>*:nth-child(4){animation-delay:.3s}
+.reference-hero-copy>*:nth-child(5){animation-delay:.38s}
+.reference-hero-visual{animation:artHeroIn .95s .18s both cubic-bezier(.2,.7,.2,1)}
+.hero-image-stack{isolation:isolate}
+.hero-image-stack:before,.hero-image-stack:after{content:"";position:absolute;z-index:-1;pointer-events:none;border-radius:56% 44% 62% 38% / 42% 57% 43% 58%}
+.hero-image-stack:before{width:115px;height:130px;right:-22px;top:7%;background:rgba(233,130,93,.36);filter:blur(1px);animation:paintDrift 7s ease-in-out infinite}
+.hero-image-stack:after{width:82px;height:95px;left:-26px;bottom:8%;background:rgba(177,164,221,.43);animation:paintDrift 8s ease-in-out infinite reverse}
+.hero-image-stamp{animation:stampFloat 5s ease-in-out infinite}
+.eyebrow-dot,.closing-spark{animation:softPulse 3.2s ease-in-out infinite}
+h1 em,h2 em{position:relative;display:inline-block}
+h1 em:after,h2 em:after{content:"";position:absolute;left:0;right:0;bottom:-.04em;height:.09em;border-radius:100%;background:currentColor;opacity:.28;transform:rotate(-1.5deg);animation:brushSweep .9s .55s both}
+.path-card,.gallery-tile,.process-grid article{transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s,border-color .35s}
+.path-card:hover{transform:translateY(-8px) rotate(-.35deg);box-shadow:0 18px 40px rgba(66,49,35,.09)}
+.path-card:nth-child(2):hover{transform:translateY(-8px) rotate(.35deg)}
+.path-card .path-visual,.gallery-img{transition:transform .65s cubic-bezier(.2,.7,.2,1),filter .65s}
+.path-card:hover .path-visual,.gallery-tile:hover .gallery-img{transform:scale(1.045)}
+.gallery-tile:hover{transform:translateY(-5px)}
+.gallery-tile:hover .gallery-label b,.card-link b{transition:transform .25s}
+.gallery-tile:hover .gallery-label{color:#bd6546}
+.button{position:relative;overflow:hidden}
+.button:before{content:"";position:absolute;inset:0;background:rgba(255,255,255,.13);transform:translateX(-110%) skewX(-18deg);transition:transform .5s}
+.button:hover:before{transform:translateX(110%) skewX(-18deg)}
+.artist-portrait,.feature-artwork,.path-visual{overflow:hidden}
+.feature-artwork img{transition:transform .8s cubic-bezier(.2,.7,.2,1)}
+.feature-artwork:hover img{transform:scale(1.035) rotate(.5deg)}
+.process-grid article:hover{transform:translateY(-5px)}
+.art-reveal{opacity:0;transform:translateY(22px);transition:opacity .75s ease,transform .75s cubic-bezier(.2,.7,.2,1)}
+.art-reveal.is-visible{opacity:1;transform:translateY(0)}
+.path-card.art-reveal:nth-child(2),.gallery-tile.art-reveal:nth-child(2),.process-grid article.art-reveal:nth-child(2){transition-delay:.1s}
+.path-card.art-reveal:nth-child(3),.gallery-tile.art-reveal:nth-child(3),.process-grid article.art-reveal:nth-child(3){transition-delay:.2s}
+@media (prefers-reduced-motion:reduce){
+ html{scroll-behavior:auto}
+ *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+ .art-reveal{opacity:1;transform:none}
+}
