@@ -72,38 +72,78 @@ if(motionTargets.length){
   function curved(x1,y1,x2,y2,steps=22,bend=0){
     const out=[];for(let i=0;i<=steps;i++){const t=i/steps;out.push([x1+(x2-x1)*t,y1+(y2-y1)*t+Math.sin(t*Math.PI)*bend]);}return out;
   }
+  function zigzagAcross(rect,rows,stepsPerRow=18){
+    const points=[];
+    for(let row=0;row<rows;row++){
+      const y=rect.top+(rect.height*(row/(rows-1||1)));
+      const fromX=row%2===0?rect.left:rect.right;
+      const toX=row%2===0?rect.right:rect.left;
+      for(let s=0;s<=stepsPerRow;s++){
+        const t=s/stepsPerRow;
+        points.push([fromX+(toX-fromX)*t,y]);
+      }
+    }
+    return points;
+  }
+  function revealBrandZigzag(progress){
+    const step=13,limit=Math.max(0,Math.min(100,progress*100));
+    const pts=[[0,0],[100,0]];
+    let y=step,dir=1;
+    while(y<limit){
+      pts.push([dir===1?100:0,y]);
+      y+=step;dir*=-1;
+      pts.push([dir===1?0:100,Math.min(y,limit)]);
+      y+=step;dir*=-1;
+    }
+    pts.push([dir===1?100:0,limit],[0,0]);
+    brand.style.clipPath='polygon('+pts.map(p=>p[0]+'% '+p[1]+'%').join(',')+')';
+  }
+  function animateLogoPaint(points,duration){
+    return new Promise(resolve=>{
+      const start=performance.now(),total=points.length;
+      brand.classList.add('is-visible');
+      function frame(now){
+        if(stopped){resolve();return;}
+        const p=Math.min(1,(now-start)/duration),idx=Math.max(1,Math.ceil(p*(total-1)));
+        const point=points[Math.min(idx,total-1)];
+        revealBrandZigzag(p);
+        eraseStroke(points.slice(0,idx+1),Math.max(7,Math.min(16,w*.014)));
+        moveBrush(point[0],point[1],point[0]>(w/2)?-22:22);
+        if(p<1)raf=requestAnimationFrame(frame);else{revealBrandZigzag(1);resolve();}
+      }
+      revealBrandZigzag(0);
+      raf=requestAnimationFrame(frame);
+    });
+  }
   async function run(){
-    await pause(450);if(stopped)return;
-    brand.classList.add('is-visible');brush.classList.add('is-active');
-    const cy=h*.5,cx=w*.5;
-    moveBrush(cx-w*.15,cy-8,18);
-    await pause(350);if(stopped)return;
-    /* A visible brush pass introduces the company mark. */
-    for(let i=0;i<3&&!stopped;i++){
-      const y=cy-27+i*26;
-      await animateStroke(curved(cx-w*.17,y,cx+w*.16,y-3,24, i===1?3:-2),Math.max(5,w*.006),360);
-    }
+    await pause(500);if(stopped)return;
+    brush.classList.add('is-active');
+    const cx=w*.5,cy=h*.5;
+    const brandRect=brand.getBoundingClientRect();
+    const logoPath=zigzagAcross({
+      left:Math.max(18,brandRect.left-8),
+      right:Math.min(w-18,brandRect.right+8),
+      top:Math.max(20,brandRect.top-12),
+      height:Math.min(brandRect.height+24,Math.max(100,h*.19))
+    },7,24);
+    await animateLogoPaint(logoPath,1650);
     if(stopped)return;
-    await pause(300);brand.classList.add('is-lowered');
-    /* Broad, irregular brush strokes uncover the nature artwork like wet paint. */
-    const sw=Math.max(42,Math.min(94,w*.095));
-    const strokes=[
-      curved(-w*.08,h*.61,w*.66,h*.43,30,-h*.08),
-      curved(w*.02,h*.73,w*1.08,h*.58,32,h*.035),
-      curved(-w*.05,h*.83,w*.79,h*.72,30,-h*.025),
-      curved(w*.2,h*.49,w*1.06,h*.38,28,-h*.025),
-      curved(-w*.04,h*.55,w*.48,h*.5,24,h*.025),
-      curved(w*.46,h*.88,w*1.08,h*.79,24,-h*.035)
-    ];
-    for(let i=0;i<strokes.length&&!stopped;i++){
-      await animateStroke(strokes[i],sw*(i===4?.72:1),i===0?650:480);
-    }
+    await pause(260);
+    brand.classList.add('is-lowered');
+    /* Broad zig-zag brush strokes sweep from the top of the canvas to the bottom. */
+    const edge= Math.max(34,Math.min(76,w*.075));
+    const landscapePath=zigzagAcross({
+      left:-edge*.65,
+      right:w+edge*.65,
+      top:h*.36,
+      height:h*.72
+    },9,32);
+    await animateStroke(landscapePath,Math.max(50,Math.min(100,w*.105)),3000);
     if(stopped)return;
-    /* Lift the remaining dark veil to land on the complete painting and homepage. */
     await pause(180);
     ctx.save();ctx.globalCompositeOperation='destination-out';ctx.fillStyle='#000';ctx.fillRect(0,0,w,h);ctx.restore();
     brush.classList.remove('is-active');
-    later(finish,550);
+    later(finish,650);
   }
   skip.addEventListener('click',finish);
   run().catch(finish);
