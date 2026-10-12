@@ -54,45 +54,48 @@ if(motionTargets.length){
     ctx.clearRect(0,0,innerWidth,innerHeight);
     if(!art.complete||!art.naturalWidth)return;
     const p=Math.max(0,Math.min(1,progress));
-    /* Reveal in alternating diagonal bands; the pencil travels left-right, then right-left. */
-    const bandCount=24;
-    const total=p*bandCount;
-    const band=Math.min(bandCount,Math.floor(total));
-    const t=total-band;
-    const bandH=box.h/bandCount;
+    /* A pencil sketches diagonally from the artwork's top-left to its bottom-right. */
+    const steps=110;
+    const step=Math.floor(p*steps);
+    const t=step/steps;
+    const endX=box.x+t*box.w;
+    const endY=box.y+t*box.h;
     ctx.save();
-    for(let i=0;i<band;i++){
-      const y=box.y+i*bandH;
-      ctx.save();ctx.beginPath();ctx.rect(box.x,y,box.w,bandH+1);ctx.clip();
-      ctx.drawImage(art,box.x,box.y,box.w,box.h);ctx.restore();
+    ctx.beginPath();
+    ctx.moveTo(box.x,box.y);
+    ctx.lineTo(endX, endY);
+    if(p>=1){
+      ctx.lineTo(box.x+box.w,box.y+box.h);
+      ctx.lineTo(box.x+box.w,box.y);
+      ctx.closePath();
+    }else{
+      ctx.lineTo(endX,box.y);
+      ctx.lineTo(box.x+box.w,box.y);
+      ctx.lineTo(box.x+box.w,box.y+box.h);
+      ctx.lineTo(box.x,box.y+box.h);
+      ctx.closePath();
     }
-    if(band<bandCount){
-      const leftToRight=band%2===0;
-      const y=box.y+band*bandH;
-      const x=leftToRight?box.x+t*box.w:box.x+(1-t)*box.w;
-      ctx.save();ctx.beginPath();
-      if(leftToRight)ctx.rect(box.x,y,Math.max(0,x-box.x),bandH+1);
-      else ctx.rect(x,y,Math.max(0,box.x+box.w-x),bandH+1);
-      ctx.clip();ctx.drawImage(art,box.x,box.y,box.w,box.h);ctx.restore();
-    }
+    ctx.clip();
+    ctx.drawImage(art,box.x,box.y,box.w,box.h);
     ctx.restore();
     if(p<1){
-      const leftToRight=band%2===0;
-      const tipX=box.x+(leftToRight?t:1-t)*box.w;
-      const tipY=box.y+Math.min(bandCount-0.01,band+t)*bandH;
+      /* Fine graphite strokes around the moving tip create a hand-sketched feel. */
+      const wiggle=Math.sin(p*steps*1.7)*Math.min(8,box.w*.006);
+      const tipX=endX+wiggle;
+      const tipY=endY-wiggle*.45;
       ctx.save();
-      for(let i=0;i<38;i++){
-        const dx=((i*17)%61)-30,dy=((i*29)%61)-30;
+      for(let i=0;i<30;i++){
+        const dx=((i*17)%47)-23,dy=((i*29)%47)-23;
         const xx=tipX+dx,yy=tipY+dy;
         if(xx<box.x||xx>box.x+box.w||yy<box.y||yy>box.y+box.h)continue;
-        ctx.beginPath();ctx.moveTo(xx-3,yy+4);ctx.lineTo(xx+4,yy-4);
-        ctx.strokeStyle='rgba(47,43,39,'+(0.16+(i%4)*.055)+')';ctx.lineWidth=.7;ctx.stroke();
+        ctx.beginPath();ctx.moveTo(xx-2.5,yy+3);ctx.lineTo(xx+3,yy-2.5);
+        ctx.strokeStyle='rgba(47,43,39,'+(0.12+(i%4)*.035)+')';ctx.lineWidth=.65;ctx.stroke();
       }
       ctx.restore();
       pencil.style.display='block';
       pencil.style.left=Math.max(0,Math.min(innerWidth-52,tipX-25))+'px';
       pencil.style.top=Math.max(0,Math.min(innerHeight-52,tipY-35))+'px';
-      pencil.style.transform='rotate('+(leftToRight?35:145)+'deg)';
+      pencil.style.transform='rotate(35deg)';
     }else{
       pencil.style.display='none';
     }
@@ -107,7 +110,7 @@ if(motionTargets.length){
   }
   function animate(now){
     if(!startTime)startTime=now;
-    const p=Math.min(1,(now-startTime)/10000);
+    const p=Math.min(1,(now-startTime)/16000);
     draw(p);
     if(p<1){raf=requestAnimationFrame(animate);}
     else finish();
