@@ -17,67 +17,86 @@ if(motionTargets.length){
 }
 
 
-/* Four-second white-canvas liquid paint throw and bold dimensional brand reveal. */
-(function initColourIntro(){
+/* Six-second zig-zag sketch reveal of the uploaded artwork. */
+(function initSketchIntro(){
   const intro=document.getElementById('paint-intro');
   if(!intro)return;
   const brand=intro.querySelector('.paint-intro-brand');
   const skip=intro.querySelector('.paint-intro-skip');
-  ['.paint-intro-landscape','.paint-intro-canvas','.paint-intro-brush'].forEach(s=>intro.querySelector(s)?.remove());
-  intro.classList.add('colour-intro');
+  const oldNodes=intro.querySelectorAll('.paint-intro-landscape,.paint-intro-brush');
+  oldNodes.forEach(n=>n.remove());
+  intro.classList.add('sketch-intro');
   const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let finished=false,timers=[];
-  const later=(fn,ms)=>{const id=setTimeout(fn,ms);timers.push(id);return id;};
-  function finish(){
-    if(finished)return;finished=true;timers.forEach(clearTimeout);
-    intro.classList.add('is-finished');
-    later(()=>intro.remove(),850);
+  let ended=false, frame=0, startTime=0, raf=0;
+  const canvas=intro.querySelector('.paint-intro-canvas');
+  if(!canvas||!brand){intro.remove();return;}
+  const ctx=canvas.getContext('2d');
+  const art=new Image();
+  art.src='https://raw.githubusercontent.com/AKxSTAdvertising/art/main/images/WhatsApp%20Image%202026-10-12%20at%202.15.12%20PM.jpeg';
+  let box={x:0,y:0,w:0,h:0};
+  function resize(){
+    const dpr=Math.min(window.devicePixelRatio||1,2);
+    canvas.width=Math.round(innerWidth*dpr);canvas.height=Math.round(innerHeight*dpr);
+    canvas.style.width=innerWidth+'px';canvas.style.height=innerHeight+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    const maxW=Math.min(innerWidth*.78,980), maxH=innerHeight*.66;
+    const scale=Math.min(maxW/art.naturalWidth,maxH/art.naturalHeight);
+    box={w:art.naturalWidth*scale,h:art.naturalHeight*scale};
+    box.x=(innerWidth-box.w)/2;box.y=Math.max(22,(innerHeight-box.h-100)/2);
+    if(ended)draw(1);
   }
-  if(reduce){intro.remove();return;}
-  const palette=[
-    ['#ff3b30','#ffb21c','#f72585'],['#00c2d1','#2364ff','#8a2be2'],
-    ['#ff6a00','#ff1744','#ffd400'],['#00b879','#00a6fb','#d000ff'],
-    ['#ffcc00','#ff4d6d','#4361ee'],['#ff1493','#7b2cff','#00d4ff']
-  ];
-  function makeDrop(parent,x,y,size,colour,delay,angle){
-    const d=document.createElement('i');
-    d.className='liquid-drop';
-    d.style.left=x+'%';d.style.top=y+'%';d.style.width=size+'px';
-    d.style.setProperty('--drop-colour',colour);d.style.setProperty('--drop-delay',delay+'ms');d.style.setProperty('--drop-angle',angle+'deg');
-    parent.appendChild(d);later(()=>d.remove(),6200+delay);
-  }
-  function splash(i){
-    const el=document.createElement('div');el.className='colour-splash splash-'+(i%6);
-    /* Fixed, screen-wide coverage prevents bursts clustering in one area. */
-    const positions=[
-      [8,18],[30,42],[53,15],[78,34],
-      [94,57],[17,68],[61,61],[84,12]
-    ];
-    const [baseX,baseY]=positions[i%positions.length];
-    const x=Math.max(5,Math.min(95,baseX+(Math.random()-.5)*8));
-    const y=Math.max(8,Math.min(78,baseY+(Math.random()-.5)*8));
-    el.style.left=x+'%';el.style.top=y+'%';
-    const c=palette[i%palette.length];
-    el.style.setProperty('--c1',c[0]);el.style.setProperty('--c2',c[1]);el.style.setProperty('--c3',c[2]);
-    el.style.setProperty('--turn',(Math.random()*40-20)+'deg');
-    el.style.setProperty('--splash-delay',(i*70)+'ms');
-    intro.insertBefore(el,brand);
-    /* Fine satellite droplets make the burst read like thrown liquid paint. */
-    for(let d=0;d<11;d++){
-      const dx=(Math.random()-.5)*38,dy=(Math.random()-.5)*38;
-      makeDrop(intro,Math.max(1,Math.min(99,x+dx)),Math.max(1,Math.min(85,y+dy)),3+Math.random()*12,c[d%3],i*65+Math.random()*180,Math.random()*80-40);
+  function draw(progress){
+    ctx.clearRect(0,0,innerWidth,innerHeight);
+    if(!art.complete||!art.naturalWidth)return;
+    const p=Math.max(0,Math.min(1,progress));
+    const edge=box.x-box.w*.08+(box.w*1.16*p);
+    const step=Math.max(8,Math.min(18,box.w/45));
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(box.x-2,box.y-2);
+    ctx.lineTo(Math.min(edge,box.x+box.w+2),box.y-2);
+    for(let y=box.y;y<=box.y+box.h+step;y+=step){
+      const zig=edge+Math.sin(y*.16)*Math.min(10,box.w*.012)+(Math.round((y-box.y)/step)%2? -step*.65:step*.65);
+      ctx.lineTo(Math.max(box.x-2,Math.min(box.x+box.w+2,zig)),y);
     }
-    later(()=>el.remove(),6200);
+    ctx.lineTo(box.x-2,box.y+box.h+2);ctx.closePath();ctx.clip();
+    ctx.drawImage(art,box.x,box.y,box.w,box.h);
+    ctx.restore();
+    if(p<.99){
+      ctx.save();ctx.beginPath();
+      for(let y=box.y;y<=box.y+box.h+step;y+=step){
+        const zig=edge+Math.sin(y*.16)*Math.min(10,box.w*.012)+(Math.round((y-box.y)/step)%2?-step*.65:step*.65);
+        if(y===box.y)ctx.moveTo(zig,y);else ctx.lineTo(zig,y);
+      }
+      ctx.strokeStyle='rgba(45,39,35,.65)';ctx.lineWidth=1.3;ctx.setLineDash([3,3]);ctx.stroke();ctx.restore();
+    }
   }
-  async function run(){
-    await new Promise(resolve=>later(resolve,120));
-    /* Eight evenly spaced paint throws, then hold the full composition for a six-second intro. */
-    for(let i=0;i<8;i++){splash(i);await new Promise(resolve=>later(resolve,360));}
-    await new Promise(resolve=>later(resolve,260));
-    brand.classList.add('is-visible','is-3d');
-    await new Promise(resolve=>later(resolve,2900));
-    finish();
+  function finish(){
+    if(ended)return;ended=true;
+    if(raf)cancelAnimationFrame(raf);
+    draw(1);
+    brand.classList.add('is-visible');
+    intro.classList.add('sketch-complete');
+    window.setTimeout(()=>{intro.classList.add('is-finished');window.setTimeout(()=>intro.remove(),850);},950);
   }
-  if(skip)skip.addEventListener('click',finish);
-  run().catch(finish);
+  function animate(now){
+    if(!startTime)startTime=now;
+    const p=Math.min(1,(now-startTime)/6000);
+    draw(p);
+    if(p<1){raf=requestAnimationFrame(animate);}
+    else finish();
+    if(p>.78)brand.classList.add('is-visible');
+  }
+  skip?.addEventListener('click',finish);
+  window.addEventListener('resize',resize);
+  art.onload=()=>{
+    resize();
+    if(reduce){draw(1);brand.classList.add('is-visible');window.setTimeout(finish,1000);return;}
+    raf=requestAnimationFrame(animate);
+  };
+  art.onerror=()=>{
+    /* If the hosted image is temporarily unavailable, keep the intro usable. */
+    brand.classList.add('is-visible');
+    window.setTimeout(finish,1200);
+  };
 })();
