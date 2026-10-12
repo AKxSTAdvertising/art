@@ -434,3 +434,8 @@ h1 em:after,h2 em:after{content:"";position:absolute;left:0;right:0;bottom:-.04e
  .paint-intro.sketch-intro .paint-intro-name{font-size:10px!important;letter-spacing:.08em!important}
  .paint-intro.sketch-intro .paint-intro-name small{font-size:7px!important}
 }
+
+
+/* Full-screen artwork and pencil-like sketching reveal finish. */
+.paint-intro.sketch-intro .paint-intro-canvas{z-index:1!important}
+.paint-intro.sketch-intro .paint-intro-brand{bottom:clamp(14px,2.8vh,30px)!important}
