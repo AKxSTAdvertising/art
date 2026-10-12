@@ -1,200 +1,24 @@
-/* intro.js — Brush preloader + brush cursor (self-contained, no dependencies)
-   Use: <script src="intro.js"></script> inside <head> of index.html (NO defer/async) */
-(() => {
-  const CONFIG = {
-    name: 'Art, Made Personal',            // company name painted by brush
-    logo: 'a.',                            // logo letters painted inside the ring
-    image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1800&q=80', // nature placeholder
-    palette: ['#e4572e', '#f3a712', '#2e86ab', '#7a9e7e', '#c44569', '#f5e6d3'],
-    showOncePerSession: false,             // true = intro sirf pehli visit par
-    cursorColor: '#e4572e'
-  };
-
-  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const fineMouse = matchMedia('(hover:hover) and (pointer:fine)').matches;
-  const seen = CONFIG.showOncePerSession && sessionStorage.getItem('introSeen');
-  const root = document.documentElement;
-
-  /* ---------- shared brush artwork (tip at 8,92 in a 100x100 box) ---------- */
-  const brushSVG = (px, paint) => {
-    const s = px / 100;
-    return `<svg viewBox="0 0 100 100" width="${px}" height="${px}" style="position:absolute;left:${-8 * s}px;top:${-92 * s}px;overflow:visible">
-      <line x1="32" y1="68" x2="94" y2="6" stroke="#c8a26b" stroke-width="7" stroke-linecap="round"/>
-      <line x1="22" y1="78" x2="33" y2="67" stroke="#aeb4bb" stroke-width="11"/>
-      <path d="M6 94C8 84 14 78 22 78L30 86C26 92 16 95 6 94Z" fill="${paint}"/>
-    </svg>`;
-  };
-
-  /* ---------- styles ---------- */
-  const css = `
-  #intro{position:fixed;inset:0;z-index:99998;background:#000;overflow:hidden;transition:opacity 1.1s ease}
-  #intro.done{opacity:0;pointer-events:none}
-  #intro .bg{position:absolute;inset:0;background:center/cover no-repeat;opacity:0;filter:blur(40px) brightness(.55);transform:scale(1.12);transition:opacity 1.6s ease,filter 4.2s ease,transform 4.2s ease}
-  #intro .bg.show{opacity:1;filter:blur(0) brightness(.6);transform:scale(1)}
-  #intro canvas{position:absolute;inset:0;width:100%;height:100%}
-  #intro .paint{transition:opacity 1.4s ease}
-  #intro .ibrush,.brush-cursor{position:fixed;left:0;top:0;width:0;height:0;pointer-events:none;will-change:transform}
-  #intro .ibrush{z-index:2}
-  #intro .skip{position:absolute;right:22px;bottom:20px;z-index:3;background:none;border:1px solid rgba(255,255,255,.35);color:#fff;font:500 13px/1 'DM Sans',sans-serif;padding:9px 16px;border-radius:99px;cursor:pointer;letter-spacing:.08em;opacity:.7}
-  #intro .skip:hover{opacity:1}
-  .brush-cursor{z-index:99999;opacity:0;transition:opacity .25s}
-  .brush-cursor.on{opacity:1}
-  html.has-brush,html.has-brush *{cursor:none !important}`;
-  const st = document.createElement('style'); st.textContent = css; root.appendChild(st);
-  const fl = document.createElement('link'); fl.rel = 'stylesheet';
-  fl.href = 'https://fonts.googleapis.com/css2?family=Kaushan+Script&display=swap'; root.appendChild(fl);
-
-  /* ---------- tiny helpers ---------- */
-  let skipped = false;
-  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-  const ease = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-  const tween = (ms, fn, e = ease) => new Promise(res => {
-    const s = performance.now();
-    (function f(now) {
-      if (skipped) return res();
-      const t = clamp((now - s) / ms, 0, 1);
-      fn(e(t), t);
-      t < 1 ? requestAnimationFrame(f) : res();
-    })(s);
-  });
-  const wait = ms => new Promise(r => { const id = setInterval(() => skipped && (clearInterval(id), r()), 60); setTimeout(() => { clearInterval(id); r(); }, ms); });
-
-  /* ================= PRELOADER ================= */
-  function startIntro() {
-    root.style.overflow = 'hidden';
-    const el = document.createElement('div'); el.id = 'intro';
-    el.innerHTML = `<div class="bg"></div><canvas class="paint"></canvas><canvas class="text"></canvas>
-      <div class="ibrush">${brushSVG(120, CONFIG.palette[0])}</div><button class="skip">SKIP</button>`;
-    root.appendChild(el);
-    const bg = el.querySelector('.bg'); bg.style.backgroundImage = `url("${CONFIG.image}")`;
-    const paint = el.querySelector('.paint'), text = el.querySelector('.text');
-    const brush = el.querySelector('.ibrush');
-    const pctx = paint.getContext('2d'), tctx = text.getContext('2d');
-    el.querySelector('.skip').onclick = () => { skipped = true; };
-
-    const dpr = Math.min(devicePixelRatio || 1, 2);
-    let W = innerWidth, H = innerHeight;
-    [paint, text].forEach(c => { c.width = W * dpr; c.height = H * dpr; });
-    pctx.scale(dpr, dpr); tctx.scale(dpr, dpr);
-
-    /* brush follows (x,y) with a little tilt from movement */
-    let bx = -200, by = H + 200, tilt = -12;
-    const setBrush = (x, y) => {
-      tilt += (clamp(-12 + (x - bx) * .8, -35, 12) - tilt) * .25;
-      bx = x; by = y;
-      brush.style.transform = `translate(${x}px,${y}px) rotate(${tilt}deg)`;
-    };
-    setBrush(bx, by);
-
-    /* offscreen text so the brush can "reveal" it stroke by stroke */
-    const makeText = (str, size, grad) => {
-      const c = document.createElement('canvas'); c.width = W * dpr; c.height = H * dpr;
-      const x = c.getContext('2d'); x.scale(dpr, dpr);
-      x.font = `400 ${size}px "Kaushan Script", "Playfair Display", cursive`;
-      x.textAlign = 'center'; x.textBaseline = 'middle';
-      const g = x.createLinearGradient(W / 2 - size * 4, 0, W / 2 + size * 4, 0);
-      g.addColorStop(0, '#f8e7bd'); g.addColorStop(1, '#e0b15a');
-      x.fillStyle = x.strokeStyle = grad ? g : '#f8e7bd';
-      x.lineJoin = 'round'; x.lineWidth = size * .035;   // faux-bold calligraphy
-      x.shadowColor = 'rgba(0,0,0,.45)'; x.shadowBlur = size * .12;
-      x.strokeText(str, grad.cx, grad.cy); x.fillText(str, grad.cx, grad.cy);
-      return { c, w: x.measureText(str).width };
-    };
-    const reveal = async (src, x0, x1, cy, amp, ms) => {
-      let prev = x0;
-      await tween(ms, p => {
-        const x = x0 + (x1 - x0) * p, sw = x - prev + 6;
-        if (sw > 0) tctx.drawImage(src, (prev - 3) * dpr, 0, sw * dpr, H * dpr, prev - 3, 0, sw, H);
-        prev = x;
-        setBrush(x, cy + Math.sin(p * Math.PI * 6) * amp);
-      }, t => t);
-    };
-
-    (async () => {
-      try { await document.fonts.load('400 100px "Kaushan Script"'); } catch (e) {}
-      /* layout */
-      const probe = tctx.measureText ? (() => { tctx.font = '400 100px "Kaushan Script", cursive'; return tctx.measureText(CONFIG.name).width; })() : 800;
-      const size = Math.min(W * .82 / probe * 100, 150);
-      const cx = W / 2, cy = H * .56;
-      const r = clamp(size * .5, 26, 70), ly = cy - size * .6 - r;
-
-      /* 1) brush enters + paints the whole screen in a zigzag */
-      const rows = 6, rowH = H / rows;
-      const pt = t => {
-        const row = Math.min(rows - 1, Math.floor(t * rows)), u = t * rows - row;
-        const x = ((row % 2 === 0) ? u : 1 - u) * (W + 120) - 60;
-        return [x, rowH * (row + .5) + Math.sin(u * Math.PI * 2 + row) * rowH * .25, row];
-      };
-      const st0 = pt(0), from = [bx, by];
-      await tween(650, p => setBrush(from[0] + (st0[0] - from[0]) * p, from[1] + (st0[1] - from[1]) * p));
-      let prev = st0;
-      await tween(3200, p => {
-        const [x, y, row] = pt(p);
-        pctx.strokeStyle = CONFIG.palette[row % CONFIG.palette.length];
-        pctx.lineWidth = rowH * 1.15; pctx.lineCap = 'round';
-        pctx.beginPath(); pctx.moveTo(prev[0], prev[1]); pctx.lineTo(x, y); pctx.stroke();
-        prev = [x, y]; setBrush(x, y);
-      }, t => t);
-      paint.style.opacity = .3;                       // paint fades back, design stays
-
-      /* 2) brush rolls to the middle and paints the company name */
-      const name = makeText(CONFIG.name, size, { cx, cy });
-      const nx0 = cx - name.w / 2 - 10, nx1 = cx + name.w / 2 + 10;
-      const f2 = [bx, by];
-      await tween(600, p => setBrush(f2[0] + (nx0 - f2[0]) * p, f2[1] + (cy - f2[1]) * p));
-      await reveal(name.c, nx0, nx1, cy, size * .28, 2400);
-
-      /* 3) nature image appears, blurred -> clear slowly */
-      bg.classList.add('show');
-      paint.style.opacity = .15;
-      await wait(900);
-
-      /* 4) brush draws the logo (ring + letters) */
-      const f3 = [bx, by];
-      await tween(500, p => setBrush(f3[0] + (cx + r - f3[0]) * p, f3[1] + (ly - f3[1]) * p));
-      let a0 = 0;
-      tctx.lineCap = 'round'; tctx.strokeStyle = '#f0cf86'; tctx.lineWidth = Math.max(3, r * .09);
-      await tween(1300, p => {
-        const a1 = p * Math.PI * 2;
-        tctx.beginPath(); tctx.arc(cx, ly, r, a0 - 1.57, a1 - 1.57); tctx.stroke();
-        a0 = a1; setBrush(cx + r * Math.cos(a1 - 1.57), ly + r * Math.sin(a1 - 1.57));
-      });
-      const lg = makeText(CONFIG.logo, r * 1.35, { cx, cy: ly });
-      await reveal(lg.c, cx - lg.w / 2 - 6, cx + lg.w / 2 + 6, ly, r * .22, 900);
-
-      /* 5) brush leaves, loader fades into home page */
-      const f4 = [bx, by];
-      await tween(700, p => setBrush(f4[0] + (W + 200 - f4[0]) * p, f4[1] + (H * .85 - f4[1]) * p));
-      await wait(1200);
-      el.classList.add('done');
-      root.style.overflow = '';
-      if (CONFIG.showOncePerSession) sessionStorage.setItem('introSeen', '1');
-      setTimeout(() => el.remove(), 1200);
-    })();
-  }
-
-  /* ================= BRUSH CURSOR ================= */
-  function startCursor() {
-    root.classList.add('has-brush');
-    const c = document.createElement('div'); c.className = 'brush-cursor';
-    c.innerHTML = brushSVG(46, CONFIG.cursorColor);
-    root.appendChild(c);
-    let tx = innerWidth / 2, ty = innerHeight / 2, x = tx, y = ty, ang = -12, sc = 1, targetSc = 1;
-    addEventListener('mousemove', e => {
-      tx = e.clientX; ty = e.clientY; c.classList.add('on');
-      targetSc = e.target.closest && e.target.closest('a,button,summary,input,textarea,[role=button]') ? 1.3 : 1;
-    }, { passive: true });
-    document.addEventListener('mouseleave', () => c.classList.remove('on'));
-    (function loop() {
-      const dx = tx - x;
-      x += dx * .16; y += (ty - y) * .16;                       // lag = paint-brush "drag" feel
-      ang += (clamp(-12 + dx * .9, -40, 20) - ang) * .18;       // tilts while moving, settles when still
-      sc += (targetSc - sc) * .2;
-      c.style.transform = `translate(${x}px,${y}px) rotate(${ang}deg) scale(${sc})`;
-      requestAnimationFrame(loop);
-    })();
-  }
-
-  if (!reduceMotion && !seen) startIntro();
-  if (fineMouse) startCursor();
-})();
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Art, Made Personal | Workshops & Original Paintings</title>
+<meta name="description" content="Find your way into art: explore welcoming workshops, discover original paintings, or book a conversation about your creative idea.">
+<meta name="robots" content="index,follow"><link rel="canonical" href="https://akxstadvertising.github.io/art/">
+<meta property="og:type" content="website"><meta property="og:title" content="Art, Made Personal"><meta property="og:description" content="Learn to make art, discover paintings, or book a conversation."><meta property="og:url" content="https://akxstadvertising.github.io/art/"><meta name="theme-color" content="#fffaf4">
+<link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Art, Made Personal","url":"https://akxstadvertising.github.io/art/","description":"Art workshops and original paintings. Replace this placeholder identity and URL when the final brand domain is chosen."}</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header"><a class="brand" href="index.html" aria-label="Art, Made Personal home"><span class="brand-mark">a.</span><span>ART, MADE PERSONAL<small>MAKE SPACE FOR CREATIVITY</small></span></a><button class="menu-toggle" aria-expanded="false" aria-controls="site-nav">Menu <span>☰</span></button><nav id="site-nav" class="site-nav" aria-label="Main navigation"><a href="learn.html">Workshops</a><a href="gallery.html">Paintings</a><a href="about.html">The artist</a><a class="nav-cta" href="contact.html">Book a call <span>↗</span></a></nav></header>
+<main id="main">
+<section class="reference-hero"><div class="reference-hero-copy"><p class="eyebrow"><span class="eyebrow-dot"></span> A CREATIVE SPACE FOR EVERYDAY LIFE</p><h1>Make art a part<br>of <em>your story.</em></h1><p class="hero-intro">Start with a guided workshop, find a painting that feels like it belongs with you, or bring an idea to the studio. No big speech required—just a place to begin.</p><div class="hero-actions"><a class="button button-dark" href="learn.html">Explore workshops <span>↗</span></a><a class="text-link" href="gallery.html">See the paintings <span>→</span></a></div><div class="hero-trust-row"><span class="trust-symbol">✳</span><span>Beginner-friendly spirit</span><i></i><span>Art made to be lived with</span></div></div><div class="reference-hero-visual"><div class="hero-image-stack"><img class="hero-image-large" src="https://images.unsplash.com/photo-1541961017774-22349e4a1262?auto=format&fit=crop&w=1100&q=85" alt="Colourful abstract artwork in a studio setting"><img class="hero-image-inset" src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=500&q=80" alt="Paint brushes, paints and an artist's sketchbook"><span class="hero-image-stamp"><b>MAKE</b><em>some<br>magic</em><small>ONE DAY AT A TIME</small></span></div><p class="visual-caption">A little practice. A little wonder. A little more you.</p></div></section>
+<section class="entry-paths section-wrap"><div class="section-heading"><p class="eyebrow">CHOOSE YOUR OWN STARTING POINT</p><h2>What brings you <em>here today?</em></h2><p class="section-subtitle">Three ways into the same thing: making space for art in your life.</p></div><div class="path-grid"><a class="path-card path-learn" href="learn.html"><div class="path-top"><span class="path-number">01 / LEARN</span><span class="circle-arrow">↗</span></div><div class="path-visual visual-learn" role="img" aria-label="Paints, brushes and sketchbook ready for an art session"></div><h3>I want to learn</h3><p>Guided workshops that help you experiment, build confidence and enjoy the process one step at a time.</p><span class="card-link">Explore workshops <b>→</b></span></a><a class="path-card path-buy" href="gallery.html"><div class="path-top"><span class="path-number">02 / DISCOVER</span><span class="circle-arrow">↗</span></div><div class="path-visual visual-buy" role="img" aria-label="Framed artwork displayed in a calm gallery interior"></div><h3>I want to buy a painting</h3><p>Browse the gallery, learn about individual pieces and ask questions before choosing your artwork.</p><span class="card-link">Browse paintings <b>→</b></span></a><a class="path-card path-call" href="contact.html"><div class="path-top"><span class="path-number">03 / CONNECT</span><span class="circle-arrow">↗</span></div><div class="path-visual visual-call"><span class="call-quote">Every creative journey<br>starts somewhere.</span><span class="call-sun">✳</span></div><h3>Book a call</h3><p>Have a project, a question or an idea in mind? Start a conversation and explore the next step.</p><span class="card-link">Let’s talk <b>→</b></span></a></div></section>
+<section class="workshop-feature"><div class="section-wrap feature-layout"><div class="feature-artwork"><img src="https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?auto=format&fit=crop&w=1000&q=85" alt="Art materials and colourful painting in a creative studio" loading="lazy"><span class="image-tag">THE WORKSHOP EXPERIENCE</span></div><div class="feature-copy"><p class="eyebrow">01 / LEARN BY MAKING</p><h2>A guided journey<br>from first mark to<br><em>your own rhythm.</em></h2><p>Good learning is more than watching someone else paint. It gives you a clear next step, room to ask questions and the freedom to find your own way of working.</p><div class="feature-points"><div><span>01</span><p><b>Step-by-step guidance</b><small>Understand the process, not just the finished result.</small></p></div><div><span>02</span><p><b>Space to practise</b><small>Try techniques, make mistakes and keep going.</small></p></div><div><span>03</span><p><b>Learn at a human pace</b><small>Find the format and schedule that work for you.</small></p></div></div><a class="button button-dark" href="learn.html">See learning options <span>↗</span></a><p class="placeholder-note">Workshop dates, format and booking details will be published once confirmed.</p></div></div></section>
+<section class="gallery-section section-wrap"><div class="gallery-head"><div><p class="eyebrow">02 / ART TO LIVE WITH</p><h2>Find a piece that<br><em>feels like yours.</em></h2><p class="section-subtitle">Look closely, follow a colour, notice what stays with you.</p></div><a class="text-link" href="gallery.html">Explore the gallery <span>→</span></a></div><div class="gallery-grid"><a class="gallery-tile gallery-tile-tall" href="gallery.html" aria-label="Explore the painting gallery"><div role="img" aria-label="Abstract botanical artwork in pink and green tones" class="gallery-img gallery-img-one"></div><span class="gallery-label">01 <span>Colour & feeling</span> ↗</span></a><a class="gallery-tile" href="gallery.html" aria-label="Explore the painting gallery"><div role="img" aria-label="Abstract artwork with blue and ochre tones" class="gallery-img gallery-img-two"></div><span class="gallery-label">02 <span>Quiet moments</span> ↗</span></a><a class="gallery-tile" href="gallery.html" aria-label="Explore the painting gallery"><div role="img" aria-label="Textured modern painting in warm colours" class="gallery-img gallery-img-three"></div><span class="gallery-label">03 <span>Unexpected details</span> ↗</span></a></div><p class="placeholder-note">These are layout images, not confirmed paintings for sale. Real artwork details and availability will be added before launch.</p></section>
+<section class="artist-band"><div class="section-wrap artist-layout"><div class="artist-portrait" role="img" aria-label="Sunlit artist studio, shown as a visual placeholder"></div><div class="artist-copy"><p class="eyebrow">03 / THE PERSON BEHIND THE WORK</p><h2>Made with care.<br>Shared with <em>you.</em></h2><p>Art carries a little of the person who makes it—and a little of the person who brings it home. This space is being built around that exchange: thoughtful learning, original work and genuine conversations.</p><p class="placeholder-note">The artist’s name, verified biography, creative practice and credentials will be added here before publication.</p><a class="text-link" href="about.html">Meet the artist <span>→</span></a></div></div></section>
+<section class="process-section section-wrap"><div class="section-heading"><p class="eyebrow">HOW THIS SPACE WORKS</p><h2>Clear steps. <em>Room to explore.</em></h2></div><div class="process-grid"><article><span class="process-num">01</span><h3>Choose a path</h3><p>Explore a workshop, look through the gallery or tell us about an idea.</p></article><article><span class="process-num">02</span><h3>Get the details</h3><p>Read the information for that specific workshop or painting and ask what you need to know.</p></article><article><span class="process-num">03</span><h3>Take the next step</h3><p>Enquire or book once the details, availability and terms have been confirmed.</p></article></div></section>
+<section class="faq-section section-wrap"><div class="faq-intro"><p class="eyebrow">BEFORE YOU BEGIN</p><h2>Questions, <em>answered.</em></h2><p>A few helpful starting points. Specific workshop and artwork details will appear on their own pages.</p><a class="text-link" href="contact.html">Ask us something <span>→</span></a></div><div class="faq-list"><details><summary>Do I need experience to join an art workshop?</summary><p>It depends on the workshop. Each listing will explain the intended experience level, format and materials so you can decide whether it fits you.</p></details><details><summary>Where can I see upcoming workshops?</summary><p>Visit the Workshops page for confirmed formats and booking information. Dates and availability will be published once finalised.</p></details><details><summary>Can I ask questions about a painting before buying?</summary><p>Yes. Use the contact page to ask about the specific piece, dimensions, medium, price, availability and delivery. Details will be confirmed before a sale.</p></details><details><summary>Can I book a call about a collaboration or custom idea?</summary><p>Yes. Send a short description of your idea through the contact page. A call is not confirmed until a time has been agreed directly.</p></details></div></section>
+<section class="closing-cta"><div class="section-wrap closing-inner"><span class="closing-spark">✳</span><p class="eyebrow">A GOOD PLACE TO START IS RIGHT HERE</p><h2>What would you like<br>to make <em>possible?</em></h2><a class="button button-light" href="contact.html">Let’s start with hello <span>↗</span></a></div></section>
+</main><footer class="site-footer"><div class="footer-top"><a class="brand" href="index.html"><span class="brand-mark">a.</span><span>ART, MADE PERSONAL<small>MAKE SPACE FOR CREATIVITY</small></span></a><p>For the love of making,<br>looking, and feeling.</p><nav aria-label="Footer navigation"><a href="learn.html">Workshops</a><a href="gallery.html">Paintings</a><a href="about.html">About</a><a href="contact.html">Contact</a><a href="privacy.html">Privacy</a></nav></div><div class="footer-bottom"><span>© <span id="year">2026</span> Art, Made Personal · Placeholder brand</span><span>Made with a little imagination <b>✳</b></span></div></footer><script src="script.js" defer></script></body></html>
