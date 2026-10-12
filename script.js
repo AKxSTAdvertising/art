@@ -39,7 +39,7 @@ if(motionTargets.length){
     canvas.width=Math.round(innerWidth*dpr);canvas.height=Math.round(innerHeight*dpr);
     canvas.style.width=innerWidth+'px';canvas.style.height=innerHeight+'px';
     ctx.setTransform(dpr,0,0,dpr,0,0);
-    const maxW=Math.min(innerWidth*.78,980), maxH=innerHeight*.66;
+    const maxW=Math.min(innerWidth*.94,1500), maxH=innerHeight*.78;
     const scale=Math.min(maxW/art.naturalWidth,maxH/art.naturalHeight);
     box={w:art.naturalWidth*scale,h:art.naturalHeight*scale};
     box.x=(innerWidth-box.w)/2;box.y=Math.max(22,(innerHeight-box.h-100)/2);
@@ -49,26 +49,29 @@ if(motionTargets.length){
     ctx.clearRect(0,0,innerWidth,innerHeight);
     if(!art.complete||!art.naturalWidth)return;
     const p=Math.max(0,Math.min(1,progress));
-    const edge=box.x-box.w*.08+(box.w*1.16*p);
-    const step=Math.max(8,Math.min(18,box.w/45));
+    const step=Math.max(7,Math.min(13,box.h/58));
+    /* Reveal in hand-drawn, side-to-side zig-zag passes rather than a flat wipe. */
+    const edge=box.y+box.h*p;
     ctx.save();
     ctx.beginPath();
-    ctx.moveTo(box.x-2,box.y-2);
-    ctx.lineTo(Math.min(edge,box.x+box.w+2),box.y-2);
-    for(let y=box.y;y<=box.y+box.h+step;y+=step){
-      const zig=edge+Math.sin(y*.16)*Math.min(10,box.w*.012)+(Math.round((y-box.y)/step)%2? -step*.65:step*.65);
-      ctx.lineTo(Math.max(box.x-2,Math.min(box.x+box.w+2,zig)),y);
+    ctx.moveTo(box.x-3,box.y-3);
+    for(let x=box.x;x<=box.x+box.w+step;x+=step){
+      const yy=edge+Math.sin(x*.075)*Math.min(8,box.w*.008)+(Math.round((x-box.x)/step)%2? -step*.58:step*.58);
+      ctx.lineTo(x,Math.max(box.y-3,Math.min(box.y+box.h+3,yy)));
     }
-    ctx.lineTo(box.x-2,box.y+box.h+2);ctx.closePath();ctx.clip();
+    ctx.lineTo(box.x+box.w+3,box.y-3);ctx.closePath();ctx.clip();
     ctx.drawImage(art,box.x,box.y,box.w,box.h);
     ctx.restore();
-    if(p<.99){
-      ctx.save();ctx.beginPath();
-      for(let y=box.y;y<=box.y+box.h+step;y+=step){
-        const zig=edge+Math.sin(y*.16)*Math.min(10,box.w*.012)+(Math.round((y-box.y)/step)%2?-step*.65:step*.65);
-        if(y===box.y)ctx.moveTo(zig,y);else ctx.lineTo(zig,y);
+    /* Fine graphite hatching at the active edge makes the reveal feel drawn by hand. */
+    if(p<.995){
+      ctx.save();
+      for(let x=box.x-12;x<box.x+box.w+12;x+=7){
+        const yy=edge+Math.sin(x*.075)*Math.min(8,box.w*.008);
+        ctx.beginPath();
+        ctx.moveTo(x,yy-8);ctx.lineTo(x+((Math.floor(x)%2)?-9:9),yy+7);
+        ctx.strokeStyle='rgba(48,43,40,.58)';ctx.lineWidth=.8;ctx.stroke();
       }
-      ctx.strokeStyle='rgba(45,39,35,.65)';ctx.lineWidth=1.3;ctx.setLineDash([3,3]);ctx.stroke();ctx.restore();
+      ctx.restore();
     }
   }
   function finish(){
