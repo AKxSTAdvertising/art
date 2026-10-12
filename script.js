@@ -39,10 +39,10 @@ if(motionTargets.length){
     canvas.width=Math.round(innerWidth*dpr);canvas.height=Math.round(innerHeight*dpr);
     canvas.style.width=innerWidth+'px';canvas.style.height=innerHeight+'px';
     ctx.setTransform(dpr,0,0,dpr,0,0);
-    const maxW=Math.min(innerWidth*.94,1500), maxH=innerHeight*.78;
+    const maxW=Math.min(innerWidth*.88,1420), maxH=innerHeight*.76;
     const scale=Math.min(maxW/art.naturalWidth,maxH/art.naturalHeight);
     box={w:art.naturalWidth*scale,h:art.naturalHeight*scale};
-    box.x=(innerWidth-box.w)/2;box.y=Math.max(22,(innerHeight-box.h-100)/2);
+    box.x=(innerWidth-box.w)/2;box.y=Math.max(28,(innerHeight-box.h-125)/2);
     if(ended)draw(1);
   }
   /* A visible pencil follows every short left-right drawing pass. */
@@ -55,7 +55,7 @@ if(motionTargets.length){
     ctx.clearRect(0,0,innerWidth,innerHeight);
     if(!art.complete||!art.naturalWidth)return;
     const p=Math.max(0,Math.min(1,progress));
-    const rowH=Math.max(5,Math.min(9,box.h/90));
+    const rowH=Math.max(4,Math.min(7,box.h/115));
     const rows=Math.ceil(box.h/rowH);
     const total=p*rows;
     const row=Math.min(rows,Math.floor(total));
