@@ -395,3 +395,42 @@ h1 em:after,h2 em:after{content:"";position:absolute;left:0;right:0;bottom:-.04e
  .paint-intro.colour-intro .paint-intro-brand{gap:10px!important;white-space:normal!important;max-width:92vw}
  .paint-intro.colour-intro .paint-intro-name{font-size:12px!important;letter-spacing:.08em!important}
 }
+
+
+/* Artwork sketch intro: clean white canvas, restrained pencil edge and visible brand. */
+.paint-intro.sketch-intro{
+  display:block!important;background:#fff!important;color:#202020!important;
+  opacity:1;visibility:visible;overflow:hidden;
+}
+.paint-intro.sketch-intro .paint-intro-canvas{
+  position:absolute;inset:0;width:100%;height:100%;z-index:1;display:block;
+}
+.paint-intro.sketch-intro .paint-intro-brand{
+  position:absolute;left:50%;top:auto!important;bottom:clamp(24px,5vh,54px);
+  transform:translateX(-50%)!important;z-index:3;gap:12px;
+  opacity:0;visibility:visible;transition:opacity .65s ease!important;
+}
+.paint-intro.sketch-intro .paint-intro-brand.is-visible{opacity:1!important}
+.paint-intro.sketch-intro .paint-intro-mark{
+  width:50px!important;height:50px!important;border:1px solid #555!important;
+  border-radius:50%!important;background:#fff!important;color:#222!important;
+  -webkit-text-fill-color:#222!important;font-size:31px!important;
+  text-shadow:1px 1px 0 #bbb!important;box-shadow:2px 3px 0 #bbb!important;
+}
+.paint-intro.sketch-intro .paint-intro-name{
+  color:#222!important;font-size:12px!important;font-weight:800!important;
+  letter-spacing:.14em!important;text-shadow:none!important;
+}
+.paint-intro.sketch-intro .paint-intro-name small{
+  color:#555!important;font-size:8px!important;opacity:1!important;
+}
+.paint-intro.sketch-intro .paint-intro-skip{
+  z-index:10;background:#fff!important;color:#333!important;
+  border-color:#aaa!important;backdrop-filter:none!important;
+}
+@media(max-width:600px){
+ .paint-intro.sketch-intro .paint-intro-brand{bottom:22px;gap:8px;max-width:94vw}
+ .paint-intro.sketch-intro .paint-intro-mark{width:42px!important;height:42px!important;font-size:27px!important}
+ .paint-intro.sketch-intro .paint-intro-name{font-size:10px!important;letter-spacing:.08em!important}
+ .paint-intro.sketch-intro .paint-intro-name small{font-size:7px!important}
+}
