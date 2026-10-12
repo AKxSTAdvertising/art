@@ -17,7 +17,7 @@ if(motionTargets.length){
 }
 
 
-/* Six-second zig-zag sketch reveal of the uploaded artwork. */
+/* Slower zig-zag sketch reveal of the uploaded artwork. */
 (function initSketchIntro(){
   const intro=document.getElementById('paint-intro');
   if(!intro)return;
@@ -54,35 +54,32 @@ if(motionTargets.length){
     ctx.clearRect(0,0,innerWidth,innerHeight);
     if(!art.complete||!art.naturalWidth)return;
     const p=Math.max(0,Math.min(1,progress));
-    /* Reveal the artwork along one continuous diagonal: top-left to bottom-right. */
-    const threshold=p*2;
-    const corners=[
-      {x:box.x,y:box.y,u:0,v:0},
-      {x:box.x+box.w,y:box.y,u:1,v:0},
-      {x:box.x+box.w,y:box.y+box.h,u:1,v:1},
-      {x:box.x,y:box.y+box.h,u:0,v:1}
-    ];
-    const points=[];
-    for(let i=0;i<corners.length;i++){
-      const a=corners[i],b=corners[(i+1)%corners.length];
-      const ain=a.u+a.v<=threshold,bin=b.u+b.v<=threshold;
-      if(ain)points.push(a);
-      if(ain!==bin){
-        const t=(threshold-(a.u+a.v))/((b.u+b.v)-(a.u+a.v));
-        points.push({x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t,u:a.u+(b.u-a.u)*t,v:a.v+(b.v-a.v)*t});
-      }
+    /* Reveal in alternating diagonal bands; the pencil travels left-right, then right-left. */
+    const bandCount=24;
+    const total=p*bandCount;
+    const band=Math.min(bandCount,Math.floor(total));
+    const t=total-band;
+    const bandH=box.h/bandCount;
+    ctx.save();
+    for(let i=0;i<band;i++){
+      const y=box.y+i*bandH;
+      ctx.save();ctx.beginPath();ctx.rect(box.x,y,box.w,bandH+1);ctx.clip();
+      ctx.drawImage(art,box.x,box.y,box.w,box.h);ctx.restore();
     }
-    if(points.length){
-      ctx.save();
-      ctx.beginPath();ctx.moveTo(points[0].x,points[0].y);
-      for(let i=1;i<points.length;i++)ctx.lineTo(points[i].x,points[i].y);
-      ctx.closePath();ctx.clip();
-      ctx.drawImage(art,box.x,box.y,box.w,box.h);
-      ctx.restore();
+    if(band<bandCount){
+      const leftToRight=band%2===0;
+      const y=box.y+band*bandH;
+      const x=leftToRight?box.x+t*box.w:box.x+(1-t)*box.w;
+      ctx.save();ctx.beginPath();
+      if(leftToRight)ctx.rect(box.x,y,Math.max(0,x-box.x),bandH+1);
+      else ctx.rect(x,y,Math.max(0,box.x+box.w-x),bandH+1);
+      ctx.clip();ctx.drawImage(art,box.x,box.y,box.w,box.h);ctx.restore();
     }
+    ctx.restore();
     if(p<1){
-      /* Fine graphite hatching clusters around the moving diagonal pencil tip. */
-      const tipX=box.x+p*box.w,tipY=box.y+p*box.h;
+      const leftToRight=band%2===0;
+      const tipX=box.x+(leftToRight?t:1-t)*box.w;
+      const tipY=box.y+Math.min(bandCount-0.01,band+t)*bandH;
       ctx.save();
       for(let i=0;i<38;i++){
         const dx=((i*17)%61)-30,dy=((i*29)%61)-30;
@@ -95,7 +92,7 @@ if(motionTargets.length){
       pencil.style.display='block';
       pencil.style.left=Math.max(0,Math.min(innerWidth-52,tipX-25))+'px';
       pencil.style.top=Math.max(0,Math.min(innerHeight-52,tipY-35))+'px';
-      pencil.style.transform='rotate(35deg)';
+      pencil.style.transform='rotate('+(leftToRight?35:145)+'deg)';
     }else{
       pencil.style.display='none';
     }
@@ -110,7 +107,7 @@ if(motionTargets.length){
   }
   function animate(now){
     if(!startTime)startTime=now;
-    const p=Math.min(1,(now-startTime)/6000);
+    const p=Math.min(1,(now-startTime)/10000);
     draw(p);
     if(p<1){raf=requestAnimationFrame(animate);}
     else finish();
