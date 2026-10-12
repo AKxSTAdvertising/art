@@ -55,40 +55,51 @@ if(motionTargets.length){
     ctx.clearRect(0,0,innerWidth,innerHeight);
     if(!art.complete||!art.naturalWidth)return;
     const p=Math.max(0,Math.min(1,progress));
-    const rowH=Math.max(4,Math.min(7,box.h/115));
-    const rows=Math.ceil(box.h/rowH);
-    const total=p*rows;
-    const row=Math.min(rows,Math.floor(total));
-    const across=total-row;
-    const y=box.y+Math.min(box.h,row*rowH);
-    const leftToRight=row%2===0;
-    const x=box.x+(leftToRight?across:1-across)*box.w;
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(box.x,box.y,box.w,Math.min(box.h,row*rowH));
-    if(row<rows){
-      if(leftToRight)ctx.rect(box.x,y,Math.max(0,x-box.x),rowH+1);
-      else ctx.rect(x,y,Math.max(0,box.x+box.w-x),rowH+1);
-    }
-    ctx.clip();
-    ctx.drawImage(art,box.x,box.y,box.w,box.h);
-    ctx.restore();
-    if(p<1){
-      /* Dark graphite scratch marks at the active line, plus a faint pencil trail. */
-      ctx.save();
-      for(let i=0;i<34;i++){
-        const xx=box.x+((i*37+row*19)%(Math.max(1,box.w)));
-        const yy=y+Math.sin(i*2.1+row)*4;
-        ctx.beginPath();ctx.moveTo(xx,yy-4);ctx.lineTo(xx+(i%2?5:-5),yy+4);
-        ctx.strokeStyle='rgba(47,43,39,'+(0.28+(i%4)*.08)+')';ctx.lineWidth=.7;ctx.stroke();
+    /* Reveal the artwork along one continuous diagonal: top-left to bottom-right. */
+    const threshold=p*2;
+    const corners=[
+      {x:box.x,y:box.y,u:0,v:0},
+      {x:box.x+box.w,y:box.y,u:1,v:0},
+      {x:box.x+box.w,y:box.y+box.h,u:1,v:1},
+      {x:box.x,y:box.y+box.h,u:0,v:1}
+    ];
+    const points=[];
+    for(let i=0;i<corners.length;i++){
+      const a=corners[i],b=corners[(i+1)%corners.length];
+      const ain=a.u+a.v<=threshold,bin=b.u+b.v<=threshold;
+      if(ain)points.push(a);
+      if(ain!==bin){
+        const t=(threshold-(a.u+a.v))/((b.u+b.v)-(a.u+a.v));
+        points.push({x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t,u:a.u+(b.u-a.u)*t,v:a.v+(b.v-a.v)*t});
       }
-      ctx.beginPath();ctx.moveTo(leftToRight?box.x:x,y+rowH*.5);ctx.lineTo(leftToRight?x:box.x+box.w,y+rowH*.5);
-      ctx.strokeStyle='rgba(35,32,29,.8)';ctx.lineWidth=1.1;ctx.stroke();ctx.restore();
+    }
+    if(points.length){
+      ctx.save();
+      ctx.beginPath();ctx.moveTo(points[0].x,points[0].y);
+      for(let i=1;i<points.length;i++)ctx.lineTo(points[i].x,points[i].y);
+      ctx.closePath();ctx.clip();
+      ctx.drawImage(art,box.x,box.y,box.w,box.h);
+      ctx.restore();
+    }
+    if(p<1){
+      /* Fine graphite hatching clusters around the moving diagonal pencil tip. */
+      const tipX=box.x+p*box.w,tipY=box.y+p*box.h;
+      ctx.save();
+      for(let i=0;i<38;i++){
+        const dx=((i*17)%61)-30,dy=((i*29)%61)-30;
+        const xx=tipX+dx,yy=tipY+dy;
+        if(xx<box.x||xx>box.x+box.w||yy<box.y||yy>box.y+box.h)continue;
+        ctx.beginPath();ctx.moveTo(xx-3,yy+4);ctx.lineTo(xx+4,yy-4);
+        ctx.strokeStyle='rgba(47,43,39,'+(0.16+(i%4)*.055)+')';ctx.lineWidth=.7;ctx.stroke();
+      }
+      ctx.restore();
       pencil.style.display='block';
-      pencil.style.left=Math.max(0,Math.min(innerWidth-52,x-24))+'px';
-      pencil.style.top=Math.max(0,Math.min(innerHeight-52,y-34))+'px';
-      pencil.style.transform='rotate('+(leftToRight?35:-145)+'deg)';
-    }else{pencil.style.display='none';}
+      pencil.style.left=Math.max(0,Math.min(innerWidth-52,tipX-25))+'px';
+      pencil.style.top=Math.max(0,Math.min(innerHeight-52,tipY-35))+'px';
+      pencil.style.transform='rotate(35deg)';
+    }else{
+      pencil.style.display='none';
+    }
   }
   function finish(){
     if(ended)return;ended=true;
