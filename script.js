@@ -62,17 +62,14 @@ if(motionTargets.length){
     const endY=box.y+t*box.h;
     ctx.save();
     ctx.beginPath();
-    ctx.moveTo(box.x,box.y);
-    ctx.lineTo(endX, endY);
     if(p>=1){
-      ctx.lineTo(box.x+box.w,box.y+box.h);
-      ctx.lineTo(box.x+box.w,box.y);
-      ctx.closePath();
+      ctx.rect(box.x,box.y,box.w,box.h);
     }else{
+      /* Grow a clean diagonal sketch front from the top-left toward the bottom-right. */
+      ctx.moveTo(box.x,box.y);
       ctx.lineTo(endX,box.y);
-      ctx.lineTo(box.x+box.w,box.y);
-      ctx.lineTo(box.x+box.w,box.y+box.h);
-      ctx.lineTo(box.x,box.y+box.h);
+      ctx.lineTo(endX,endY);
+      ctx.lineTo(box.x,endY);
       ctx.closePath();
     }
     ctx.clip();
