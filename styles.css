@@ -316,3 +316,20 @@ h1 em:after,h2 em:after{content:"";position:absolute;left:0;right:0;bottom:-.04e
 @media(max-width:600px){
  .paint-intro.colour-intro .colour-splash{width:clamp(88px,24vw,140px)!important}
 }
+
+
+/* Full-screen paint coverage with softer colour intensity. */
+.paint-intro.colour-intro .colour-splash{
+  opacity:0;
+  filter:saturate(.78) brightness(.88)!important;
+  mix-blend-mode:multiply;
+}
+.paint-intro.colour-intro .liquid-drop{
+  opacity:.76!important;
+  filter:saturate(.78) brightness(.9)!important;
+}
+.paint-intro.colour-intro .colour-splash:before,
+.paint-intro.colour-intro .colour-splash:after{
+  filter:saturate(.8) brightness(.9)!important;
+  box-shadow:none!important;
+}
