@@ -251,3 +251,33 @@ h1 em:after,h2 em:after{content:"";position:absolute;left:0;right:0;bottom:-.04e
 .paint-intro.colour-intro .paint-intro-name small{color:#686868;-webkit-text-fill-color:#686868;text-shadow:none;font-weight:600}
 @keyframes logoColourFlow{0%{background-position:0% 50%}100%{background-position:180% 50%}}
 @media(max-width:600px){.paint-intro.colour-intro .paint-intro-brand{width:96vw;gap:8px}.paint-intro.colour-intro .paint-intro-mark{width:48px;height:48px;font-size:34px}.paint-intro.colour-intro .paint-intro-name{font-size:clamp(17px,5.4vw,29px);letter-spacing:0}.paint-intro.colour-intro .paint-intro-name small{font-size:6px}}
+
+
+/* Softer paint circles: remove harsh blur/glow and use calmer, organic pigment edges. */
+.paint-intro.colour-intro .colour-splash{
+  filter:none!important;
+  opacity:0;
+  mix-blend-mode:multiply;
+  background:
+    radial-gradient(ellipse at 32% 38%,var(--c1) 0 8%,transparent 25%),
+    radial-gradient(ellipse at 64% 35%,var(--c2) 0 10%,transparent 27%),
+    radial-gradient(ellipse at 47% 65%,var(--c3) 0 10%,transparent 29%),
+    radial-gradient(ellipse at 48% 48%,var(--c1) 0 15%,transparent 43%),
+    radial-gradient(ellipse at 60% 54%,var(--c2) 0 18%,transparent 48%);
+  -webkit-mask-image:radial-gradient(ellipse at 50% 48%,#000 0 48%,#000b 58%,transparent 73%);
+  mask-image:radial-gradient(ellipse at 50% 48%,#000 0 48%,#000b 58%,transparent 73%);
+}
+.paint-intro.colour-intro .colour-splash:before,
+.paint-intro.colour-intro .colour-splash:after{
+  filter:none!important;
+  box-shadow:none!important;
+}
+.paint-intro.colour-intro .liquid-drop{
+  filter:none!important;
+  box-shadow:none!important;
+  border-radius:48% 52% 58% 42%;
+}
+@media(prefers-reduced-motion:reduce){
+  .paint-intro.colour-intro .colour-splash,
+  .paint-intro.colour-intro .liquid-drop{animation-duration:.01ms!important}
+}
