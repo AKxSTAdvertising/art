@@ -333,3 +333,65 @@ h1 em:after,h2 em:after{content:"";position:absolute;left:0;right:0;bottom:-.04e
   filter:saturate(.8) brightness(.9)!important;
   box-shadow:none!important;
 }
+
+
+/* Six-second intro repair: smaller, full-canvas splashes and a clearly visible logo. */
+.paint-intro.colour-intro{
+  background:#fff!important;
+  color:#202020!important;
+}
+.paint-intro.colour-intro .colour-splash{
+  width:clamp(76px,11vw,148px)!important;
+  height:clamp(76px,11vw,148px)!important;
+  opacity:.94!important;
+  mix-blend-mode:multiply!important;
+  filter:saturate(.72) brightness(.91)!important;
+  animation-duration:5.8s!important;
+}
+.paint-intro.colour-intro .liquid-drop{
+  opacity:.78!important;
+  animation-duration:5.4s!important;
+}
+.paint-intro.colour-intro .paint-intro-brand{
+  z-index:20!important;
+  top:50%!important;
+  opacity:0;
+  visibility:visible!important;
+  pointer-events:none;
+  transition:opacity .5s ease!important;
+  transform:translate(-50%,-50%) scale(1)!important;
+}
+.paint-intro.colour-intro .paint-intro-brand.is-visible{
+  opacity:1!important;
+}
+.paint-intro.colour-intro .paint-intro-mark{
+  width:clamp(76px,10vw,118px)!important;
+  height:clamp(76px,10vw,118px)!important;
+  border:2px solid #292929!important;
+  border-radius:50%!important;
+  color:#fff!important;
+  font-size:clamp(48px,7vw,76px)!important;
+  background:linear-gradient(145deg,#ffffff,#dedede)!important;
+  -webkit-text-fill-color:#fff!important;
+  text-shadow:1px 2px 0 #999,2px 4px 0 #777,4px 7px 10px #0004!important;
+  box-shadow:inset 0 2px 3px #fff,0 6px 0 #aaa,0 10px 18px #0002!important;
+  transform:perspective(500px) rotateX(8deg)!important;
+}
+.paint-intro.colour-intro .paint-intro-name{
+  color:#262626!important;
+  font-size:clamp(14px,2vw,21px)!important;
+  font-weight:800!important;
+  letter-spacing:.13em!important;
+  text-shadow:none!important;
+  opacity:1!important;
+}
+.paint-intro.colour-intro .paint-intro-name small{
+  color:#555!important;
+  font-size:clamp(8px,1vw,11px)!important;
+  opacity:1!important;
+}
+@media(max-width:600px){
+ .paint-intro.colour-intro .colour-splash{width:clamp(66px,18vw,104px)!important;height:clamp(66px,18vw,104px)!important}
+ .paint-intro.colour-intro .paint-intro-brand{gap:10px!important;white-space:normal!important;max-width:92vw}
+ .paint-intro.colour-intro .paint-intro-name{font-size:12px!important;letter-spacing:.08em!important}
+}
