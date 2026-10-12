@@ -45,34 +45,50 @@ if(motionTargets.length){
     box.x=(innerWidth-box.w)/2;box.y=Math.max(22,(innerHeight-box.h-100)/2);
     if(ended)draw(1);
   }
+  /* A visible pencil follows every short left-right drawing pass. */
+  const pencil=document.createElement('div');
+  pencil.className='sketch-pencil';
+  pencil.setAttribute('aria-hidden','true');
+  pencil.innerHTML='<svg viewBox="0 0 64 64" focusable="false"><defs><linearGradient id="pencilWood" x1="0" x2="1"><stop stop-color="#f7e3b7"/><stop offset=".55" stop-color="#c99a5b"/><stop offset="1" stop-color="#f0d5a0"/></linearGradient></defs><path d="M12 46 42 8 Q46 3 51 8 L56 13 Q60 17 55 22 L25 52 8 57Z" fill="url(#pencilWood)" stroke="#45403b" stroke-width="2"/><path d="M42 8 56 22M12 46 25 52" fill="none" stroke="#5b5146" stroke-width="2"/><path d="M8 57 12 46 25 52Z" fill="#e8d5b8" stroke="#45403b" stroke-width="1.5"/><path d="M8 57 13 53" stroke="#252321" stroke-width="2"/><path d="M48 6 53 2 61 10 56 15" fill="#e7a7a9" stroke="#45403b" stroke-width="1.5"/></svg>';
+  intro.appendChild(pencil);
   function draw(progress){
     ctx.clearRect(0,0,innerWidth,innerHeight);
     if(!art.complete||!art.naturalWidth)return;
     const p=Math.max(0,Math.min(1,progress));
-    const step=Math.max(7,Math.min(13,box.h/58));
-    /* Reveal in hand-drawn, side-to-side zig-zag passes rather than a flat wipe. */
-    const edge=box.y+box.h*p;
+    const rowH=Math.max(5,Math.min(9,box.h/90));
+    const rows=Math.ceil(box.h/rowH);
+    const total=p*rows;
+    const row=Math.min(rows,Math.floor(total));
+    const across=total-row;
+    const y=box.y+Math.min(box.h,row*rowH);
+    const leftToRight=row%2===0;
+    const x=box.x+(leftToRight?across:1-across)*box.w;
     ctx.save();
     ctx.beginPath();
-    ctx.moveTo(box.x-3,box.y-3);
-    for(let x=box.x;x<=box.x+box.w+step;x+=step){
-      const yy=edge+Math.sin(x*.075)*Math.min(8,box.w*.008)+(Math.round((x-box.x)/step)%2? -step*.58:step*.58);
-      ctx.lineTo(x,Math.max(box.y-3,Math.min(box.y+box.h+3,yy)));
+    ctx.rect(box.x,box.y,box.w,Math.min(box.h,row*rowH));
+    if(row<rows){
+      if(leftToRight)ctx.rect(box.x,y,Math.max(0,x-box.x),rowH+1);
+      else ctx.rect(x,y,Math.max(0,box.x+box.w-x),rowH+1);
     }
-    ctx.lineTo(box.x+box.w+3,box.y-3);ctx.closePath();ctx.clip();
+    ctx.clip();
     ctx.drawImage(art,box.x,box.y,box.w,box.h);
     ctx.restore();
-    /* Fine graphite hatching at the active edge makes the reveal feel drawn by hand. */
-    if(p<.995){
+    if(p<1){
+      /* Dark graphite scratch marks at the active line, plus a faint pencil trail. */
       ctx.save();
-      for(let x=box.x-12;x<box.x+box.w+12;x+=7){
-        const yy=edge+Math.sin(x*.075)*Math.min(8,box.w*.008);
-        ctx.beginPath();
-        ctx.moveTo(x,yy-8);ctx.lineTo(x+((Math.floor(x)%2)?-9:9),yy+7);
-        ctx.strokeStyle='rgba(48,43,40,.58)';ctx.lineWidth=.8;ctx.stroke();
+      for(let i=0;i<34;i++){
+        const xx=box.x+((i*37+row*19)%(Math.max(1,box.w)));
+        const yy=y+Math.sin(i*2.1+row)*4;
+        ctx.beginPath();ctx.moveTo(xx,yy-4);ctx.lineTo(xx+(i%2?5:-5),yy+4);
+        ctx.strokeStyle='rgba(47,43,39,'+(0.28+(i%4)*.08)+')';ctx.lineWidth=.7;ctx.stroke();
       }
-      ctx.restore();
-    }
+      ctx.beginPath();ctx.moveTo(leftToRight?box.x:x,y+rowH*.5);ctx.lineTo(leftToRight?x:box.x+box.w,y+rowH*.5);
+      ctx.strokeStyle='rgba(35,32,29,.8)';ctx.lineWidth=1.1;ctx.stroke();ctx.restore();
+      pencil.style.display='block';
+      pencil.style.left=Math.max(0,Math.min(innerWidth-52,x-24))+'px';
+      pencil.style.top=Math.max(0,Math.min(innerHeight-52,y-34))+'px';
+      pencil.style.transform='rotate('+(leftToRight?35:-145)+'deg)';
+    }else{pencil.style.display='none';}
   }
   function finish(){
     if(ended)return;ended=true;
