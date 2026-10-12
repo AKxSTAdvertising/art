@@ -44,7 +44,7 @@ if(motionTargets.length){
     d.className='liquid-drop';
     d.style.left=x+'%';d.style.top=y+'%';d.style.width=size+'px';
     d.style.setProperty('--drop-colour',colour);d.style.setProperty('--drop-delay',delay+'ms');d.style.setProperty('--drop-angle',angle+'deg');
-    parent.appendChild(d);later(()=>d.remove(),2900+delay);
+    parent.appendChild(d);later(()=>d.remove(),6200+delay);
   }
   function splash(i){
     const el=document.createElement('div');el.className='colour-splash splash-'+(i%6);
@@ -67,15 +67,15 @@ if(motionTargets.length){
       const dx=(Math.random()-.5)*38,dy=(Math.random()-.5)*38;
       makeDrop(intro,Math.max(1,Math.min(99,x+dx)),Math.max(1,Math.min(85,y+dy)),3+Math.random()*12,c[d%3],i*65+Math.random()*180,Math.random()*80-40);
     }
-    later(()=>el.remove(),2800);
+    later(()=>el.remove(),6200);
   }
   async function run(){
     await new Promise(resolve=>later(resolve,120));
-    /* Paint hits in quick successive throws; the colour trails fall under gravity. */
-    for(let i=0;i<8;i++){splash(i);await new Promise(resolve=>later(resolve,250));}
-    await new Promise(resolve=>later(resolve,350));
+    /* Eight evenly spaced paint throws, then hold the full composition for a six-second intro. */
+    for(let i=0;i<8;i++){splash(i);await new Promise(resolve=>later(resolve,360));}
+    await new Promise(resolve=>later(resolve,260));
     brand.classList.add('is-visible','is-3d');
-    await new Promise(resolve=>later(resolve,900));
+    await new Promise(resolve=>later(resolve,2900));
     finish();
   }
   if(skip)skip.addEventListener('click',finish);
